@@ -136,13 +136,84 @@ addEventListener('keydown', (e) => (keys[e.code] = true));
 addEventListener('keyup', (e) => (keys[e.code] = false));
 
 let yaw = 0, pitch = -0.1;
-let dragging = false, lastX = 0, lastY = 0;
+let dragging = false, lastX = 0, lastY = 0, lookId = null;
+
+// ---------- Virtual joystick (mobile) ----------
+const isTouch = matchMedia('(pointer: coarse)').matches;
+const touchMove = { x: 0, y: 0, active: false };
+
+const stickBase = document.createElement('div');
+const stickKnob = document.createElement('div');
+if (isTouch) {
+  const baseStyle = {
+    position: 'fixed', left: '24px', bottom: '24px',
+    width: '110px', height: '110px', borderRadius: '50%',
+    background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.4)',
+    touchAction: 'none', pointerEvents: 'auto', zIndex: 10,
+  };
+  Object.assign(stickBase.style, baseStyle);
+  Object.assign(stickKnob.style, {
+    position: 'absolute', left: '50%', top: '50%',
+    width: '48px', height: '48px', borderRadius: '50%',
+    background: 'rgba(255,255,255,0.6)',
+    transform: 'translate(-50%, -50%)',
+  });
+  stickBase.appendChild(stickKnob);
+  document.body.appendChild(stickBase);
+}
+
+const STICK_RADIUS = 40;
+let stickId = null, stickCenter = { x: 0, y: 0 };
+
+function setKnob(dx, dy) {
+  stickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+}
+
+if (isTouch) {
+  stickBase.addEventListener('pointerdown', (e) => {
+    stickId = e.pointerId;
+    const r = stickBase.getBoundingClientRect();
+    stickCenter = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    stickBase.setPointerCapture(e.pointerId);
+    touchMove.active = true;
+    e.preventDefault();
+  });
+  stickBase.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== stickId) return;
+    let dx = e.clientX - stickCenter.x;
+    let dy = e.clientY - stickCenter.y;
+    const len = Math.hypot(dx, dy);
+    if (len > STICK_RADIUS) {
+      dx = (dx / len) * STICK_RADIUS;
+      dy = (dy / len) * STICK_RADIUS;
+    }
+    touchMove.x = dx / STICK_RADIUS;
+    touchMove.y = dy / STICK_RADIUS;
+    setKnob(dx, dy);
+    e.preventDefault();
+  });
+  const endStick = (e) => {
+    if (e.pointerId !== stickId) return;
+    stickId = null;
+    touchMove.x = 0;
+    touchMove.y = 0;
+    touchMove.active = false;
+    setKnob(0, 0);
+  };
+  stickBase.addEventListener('pointerup', endStick);
+  stickBase.addEventListener('pointercancel', endStick);
+}
+
 renderer.domElement.addEventListener('pointerdown', (e) => {
+  if (e.pointerType !== 'mouse') return; // touch look handled separately
   dragging = true;
+  lookId = e.pointerId;
   lastX = e.clientX;
   lastY = e.clientY;
 });
-addEventListener('pointerup', () => (dragging = false));
+addEventListener('pointerup', (e) => {
+  if (e.pointerId === lookId) dragging = false;
+});
 addEventListener('pointermove', (e) => {
   if (!dragging) return;
   yaw -= (e.clientX - lastX) * 0.004;
@@ -150,6 +221,32 @@ addEventListener('pointermove', (e) => {
   lastX = e.clientX;
   lastY = e.clientY;
 });
+
+// Touch look: any touch outside the joystick rotates the camera
+renderer.domElement.addEventListener('touchstart', (e) => {
+  if (lookId === null) {
+    const t = e.changedTouches[0];
+    lookId = t.identifier;
+    lastX = t.clientX;
+    lastY = t.clientY;
+  }
+  e.preventDefault();
+}, { passive: false });
+renderer.domElement.addEventListener('touchmove', (e) => {
+  for (const t of e.changedTouches) {
+    if (t.identifier !== lookId) continue;
+    yaw -= (t.clientX - lastX) * 0.005;
+    pitch = Math.max(-1.2, Math.min(1.2, pitch - (t.clientY - lastY) * 0.005));
+    lastX = t.clientX;
+    lastY = t.clientY;
+  }
+  e.preventDefault();
+}, { passive: false });
+renderer.domElement.addEventListener('touchend', (e) => {
+  for (const t of e.changedTouches) {
+    if (t.identifier === lookId) lookId = null;
+  }
+}, { passive: false });
 
 const velocity = new THREE.Vector3();
 const forward = new THREE.Vector3();
@@ -167,10 +264,15 @@ function animate() {
   forward.set(Math.sin(yaw), 0, Math.cos(yaw)).multiplyScalar(-1);
   velocity.set(0, 0, 0);
   const speed = 20;
+  const right = new THREE.Vector3(-forward.z, 0, forward.x);
   if (keys['KeyW'] || keys['ArrowUp']) velocity.add(forward);
   if (keys['KeyS'] || keys['ArrowDown']) velocity.sub(forward);
-  if (keys['KeyA'] || keys['ArrowLeft']) velocity.add(new THREE.Vector3(-forward.z, 0, forward.x));
-  if (keys['KeyD'] || keys['ArrowRight']) velocity.add(new THREE.Vector3(forward.z, 0, -forward.x));
+  if (keys['KeyA'] || keys['ArrowLeft']) velocity.add(right);
+  if (keys['KeyD'] || keys['ArrowRight']) velocity.sub(right);
+  if (touchMove.active) {
+    velocity.addScaledVector(forward, -touchMove.y);
+    velocity.addScaledVector(right, touchMove.x);
+  }
   if (keys['KeyQ']) camera.position.y -= speed * dt;
   if (keys['KeyE']) camera.position.y += speed * dt;
   if (velocity.lengthSq() > 0) {

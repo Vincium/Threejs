@@ -34,7 +34,7 @@ export class Player {
     if (this.controls.keys['KeyQ']) cam.y -= this.speed * dt;
     if (this.controls.keys['KeyE']) cam.y += this.speed * dt;
 
-    const eyeTarget = insideHouse ? teaHouse.FLOOR_Y + 1.75 : this.eyeHeight;
+    const eyeTarget = this.eyeHeight;
     if (Math.abs(cam.y - eyeTarget) > 0.01) {
       cam.y += (eyeTarget - cam.y) * Math.min(1, dt * 8);
     }

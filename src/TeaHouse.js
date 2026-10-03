@@ -6,10 +6,10 @@ export class TeaHouse {
     this.FLOOR_Y = options.floorY ?? 0.32;
     this.HW = options.width ?? 8;
     this.HD = options.depth ?? 6;
-    this.WALL_H = options.wallHeight ?? 3.0;
+    this.WALL_H = options.wallHeight ?? 4.4;
     this.HT = options.thickness ?? 0.24;
     this.doorW = 1.9;
-    this.doorH = 2.35;
+    this.doorH = 4.0;
 
     this.mats = {
       post: new THREE.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 0.9 }),
@@ -177,10 +177,10 @@ export class TeaHouse {
 
     for (const wx of [-HW/2, HW/2]) {
       this.box(HT, 0.9, HD, this.mats.wall, wx, FLOOR_Y + 0.45, 0);
-      this.box(HT, WALL_H - 2.5, HD, this.mats.post, wx, FLOOR_Y + 2.5 + (WALL_H - 2.5) / 2, 0);
-      this.box(HT - 0.08, 1.6, HD - 0.6, this.mats.shoji, wx, FLOOR_Y + 1.7, 0, this.group, false);
+      this.box(HT, WALL_H - 3.9, HD, this.mats.post, wx, FLOOR_Y + 3.9 + (WALL_H - 3.9) / 2, 0);
+      this.box(HT - 0.08, 2.6, HD - 0.6, this.mats.shoji, wx, FLOOR_Y + 2.6, 0, this.group, false);
       for (let fz = -HD / 2 + 0.8; fz <= HD / 2 - 0.8; fz += 0.8) {
-        this.box(HT - 0.02, 1.6, 0.05, this.mats.darkWood, wx, FLOOR_Y + 1.7, fz, this.group, false);
+        this.box(HT - 0.02, 2.6, 0.05, this.mats.darkWood, wx, FLOOR_Y + 2.6, fz, this.group, false);
       }
     }
 

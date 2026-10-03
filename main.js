@@ -25,6 +25,12 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
+const BUILD_TIME = '2026-10-03 19:18 UTC';
+const info = document.getElementById('info');
+if (info) {
+  info.textContent += ' • v: ' + BUILD_TIME;
+}
+
 // ---------- Lights ----------
 const hemi = new THREE.HemisphereLight(0xbfd9ff, 0x3a5f2b, 0.9);
 scene.add(hemi);

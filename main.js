@@ -569,7 +569,7 @@ styleEl.textContent = `
     padding: 16px 26px; border: none; border-radius: 28px;
     background: rgba(30,30,30,0.7); color: #fff;
     font-size: 17px; font-family: sans-serif;
-    display: none; z-index: 20; backdrop-filter: blur(4px);
+    display: block; z-index: 20; backdrop-filter: blur(4px);
     touch-action: manipulation; min-height: 52px;
   }
   #medOverlay {
@@ -764,10 +764,9 @@ function animate() {
   const insideHouse =
     Math.abs(camera.position.x) < HW / 2 &&
     Math.abs(camera.position.z) < HD / 2 + 0.5;
-  medBtn.style.display = insideHouse && !meditating ? 'block' : 'none';
 
   if (meditating) {
-    const targetY = FLOOR_Y + 0.9;
+    const targetY = (insideHouse ? FLOOR_Y : 0) + 0.9;
     camera.position.y += (targetY - camera.position.y) * Math.min(1, dt * 2.5);
     pitch += (-0.35 - pitch) * Math.min(1, dt * 2);
     const cycle = (windUniform.value % 8) / 8;

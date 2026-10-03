@@ -146,7 +146,7 @@ function makeTreeGeometry() {
   return treeGeo;
 }
 
-const treeCount = 220;
+const treeCount = 320;
 const variantCount = 6;
 const treesPerVariant = Math.ceil(treeCount / variantCount);
 for (let v = 0; v < variantCount; v++) {
@@ -253,6 +253,46 @@ for (let i = 0; i < grassCount; i++) {
 }
 grass.instanceMatrix.needsUpdate = true;
 scene.add(grass);
+
+// ---------- Clouds (Level 3) ----------
+const cloudMat = new THREE.MeshStandardMaterial({
+  color: 0xffffff,
+  roughness: 1,
+  transparent: true,
+  opacity: 0.92,
+  flatShading: true,
+});
+
+const cloudPuffGeos = [];
+for (let i = 0; i < 4; i++) {
+  const g = new THREE.IcosahedronGeometry(rand(4, 9), 1);
+  const p = g.attributes.position;
+  for (let j = 0; j < p.count; j++) {
+    const n = Math.sin(p.getX(j) * 1.7) + Math.cos(p.getZ(j) * 1.3) + Math.sin(p.getY(j) * 2.1);
+    p.setXYZ(j, p.getX(j), p.getY(j) * 0.55 + n * 0.5, p.getZ(j));
+  }
+  g.computeVertexNormals();
+  cloudPuffGeos.push(g);
+}
+
+const clouds = [];
+const cloudCount = 16;
+for (let i = 0; i < cloudCount; i++) {
+  const cloud = new THREE.Group();
+  const puffs = 4 + Math.floor(Math.random() * 4);
+  for (let j = 0; j < puffs; j++) {
+    const mesh = new THREE.Mesh(cloudPuffGeos[Math.floor(Math.random() * cloudPuffGeos.length)], cloudMat);
+    mesh.position.set(rand(-14, 14), rand(-2, 2), rand(-8, 8));
+    mesh.scale.setScalar(rand(0.7, 1.4));
+    cloud.add(mesh);
+  }
+  const angle = rand(0, Math.PI * 2);
+  const dist = rand(60, 220);
+  cloud.position.set(Math.cos(angle) * dist, rand(55, 85), Math.sin(angle) * dist);
+  cloud.userData.speed = rand(0.8, 2.0);
+  scene.add(cloud);
+  clouds.push(cloud);
+}
 
 // ---------- Mountains (Level 3 ring) ----------
 const FOREST_RADIUS = 118;
@@ -452,6 +492,11 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
   windUniform.value += dt;
+
+  for (const cloud of clouds) {
+    cloud.position.x += cloud.userData.speed * dt;
+    if (cloud.position.x > 260) cloud.position.x = -260;
+  }
 
   forward.set(Math.sin(yaw), 0, Math.cos(yaw)).multiplyScalar(-1);
   velocity.set(0, 0, 0);

@@ -21,9 +21,6 @@ document.addEventListener('touchend', (e) => {
   if (now - lastTouchEnd <= 300) e.preventDefault();
   lastTouchEnd = now;
 }, { passive: false });
-document.addEventListener('touchmove', (e) => {
-  if (e.target === renderer.domElement || e.target === stickBase) e.preventDefault();
-}, { passive: false });
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
@@ -654,6 +651,11 @@ if (isTouch) {
   });
   stickBase.appendChild(stickKnob);
   document.body.appendChild(stickBase);
+  document.addEventListener('touchmove', (e) => {
+    if (e.target === renderer.domElement || e.target === stickBase || e.target === stickKnob) {
+      e.preventDefault();
+    }
+  }, { passive: false });
 }
 
 let stickId = null, stickCenter = { x: 0, y: 0 };

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 export class Player {
-  constructor(camera, controls, { eyeHeight = 4, speed = 20, bounds = 130, forestRadius = 118 } = {}) {
+  constructor(camera, controls, { eyeHeight = 4, speed = 10, bounds = 130, forestRadius = 118 } = {}) {
     this.camera = camera;
     this.controls = controls;
     this.eyeHeight = eyeHeight;
@@ -24,7 +24,8 @@ export class Player {
     }
 
     if (move.lengthSq() > 0) {
-      const step = move.normalize().multiplyScalar(this.speed * dt);
+      const inputMagnitude = Math.min(1, move.length());
+      const step = move.normalize().multiplyScalar(this.speed * inputMagnitude * dt);
       const nx = cam.x + step.x;
       const nz = cam.z + step.z;
       if (!teaHouse.inCollider(nx, cam.z)) cam.x = nx;

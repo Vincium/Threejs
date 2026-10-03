@@ -216,8 +216,8 @@ addEventListener('pointerup', (e) => {
 });
 addEventListener('pointermove', (e) => {
   if (!dragging) return;
-  yaw -= (e.clientX - lastX) * 0.004;
-  pitch = Math.max(-1.2, Math.min(1.2, pitch - (e.clientY - lastY) * 0.004));
+  yaw += (e.clientX - lastX) * 0.004;
+  pitch = Math.max(-1.2, Math.min(1.2, pitch + (e.clientY - lastY) * 0.004));
   lastX = e.clientX;
   lastY = e.clientY;
 });
@@ -235,8 +235,8 @@ renderer.domElement.addEventListener('touchstart', (e) => {
 renderer.domElement.addEventListener('touchmove', (e) => {
   for (const t of e.changedTouches) {
     if (t.identifier !== lookId) continue;
-    yaw -= (t.clientX - lastX) * 0.005;
-    pitch = Math.max(-1.2, Math.min(1.2, pitch - (t.clientY - lastY) * 0.005));
+    yaw += (t.clientX - lastX) * 0.005;
+    pitch = Math.max(-1.2, Math.min(1.2, pitch + (t.clientY - lastY) * 0.005));
     lastX = t.clientX;
     lastY = t.clientY;
   }

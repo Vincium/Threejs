@@ -363,6 +363,248 @@ for (let i = 0; i < 25; i++) {
   scene.add(rock);
 }
 
+// ---------- Japanese tea house ----------
+const FLOOR_Y = 0.32;
+const HW = 8, HD = 6, WALL_H = 2.4, HT = 0.24;
+let meditating = false;
+
+const postMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 0.9 });
+const wallMat = new THREE.MeshStandardMaterial({ color: 0x9a7b52, roughness: 1 });
+const roofMat = new THREE.MeshStandardMaterial({ color: 0x35393f, roughness: 1, flatShading: true });
+const shojiMat = new THREE.MeshStandardMaterial({
+  color: 0xf7efdc, roughness: 0.8, emissive: 0x554c33, emissiveIntensity: 0.25, side: THREE.DoubleSide,
+});
+
+function makeTatamiTexture() {
+  const c = document.createElement('canvas');
+  c.width = 768; c.height = 512;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#2c261e';
+  ctx.fillRect(0, 0, c.width, c.height);
+  const cols = 3, rows = 2;
+  const mw = c.width / cols, mh = c.height / rows;
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      const x = i * mw, y = j * mh;
+      ctx.fillStyle = '#8e9d63';
+      ctx.fillRect(x + 7, y + 7, mw - 14, mh - 14);
+      ctx.strokeStyle = 'rgba(60,70,30,0.35)';
+      ctx.lineWidth = 1;
+      for (let g = 0; g < 30; g++) {
+        const gy = y + 10 + Math.random() * (mh - 20);
+        ctx.beginPath();
+        ctx.moveTo(x + 10, gy);
+        ctx.lineTo(x + mw - 10, gy + rand(-2, 2));
+        ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(255,255,240,0.06)';
+      ctx.fillRect(x + 7, y + 7, mw - 14, mh - 14);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+const house = new THREE.Group();
+
+const platform = new THREE.Mesh(new THREE.BoxGeometry(HW, FLOOR_Y, HD), postMat);
+platform.position.y = FLOOR_Y / 2;
+platform.castShadow = true;
+platform.receiveShadow = true;
+house.add(platform);
+
+const tatami = new THREE.Mesh(
+  new THREE.PlaneGeometry(HW - 0.5, HD - 0.5),
+  new THREE.MeshStandardMaterial({ map: makeTatamiTexture(), roughness: 0.95 })
+);
+tatami.rotation.x = -Math.PI / 2;
+tatami.position.y = FLOOR_Y + 0.012;
+tatami.receiveShadow = true;
+house.add(tatami);
+
+const step = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.18, 1.0), postMat);
+step.position.set(0, 0.09, HD / 2 + 0.5);
+step.castShadow = true;
+house.add(step);
+
+const postGeo = new THREE.BoxGeometry(0.28, WALL_H, 0.28);
+for (const [px, pz] of [[-HW/2+0.14, HD/2-0.14], [HW/2-0.14, HD/2-0.14], [-HW/2+0.14, -HD/2+0.14], [HW/2-0.14, -HD/2+0.14], [0, HD/2-0.14], [0, -HD/2+0.14]]) {
+  const post = new THREE.Mesh(postGeo, postMat);
+  post.position.set(px, FLOOR_Y + WALL_H / 2, pz);
+  post.castShadow = true;
+  house.add(post);
+}
+
+const doorW = 1.8, doorH = 2.0;
+const frontSegW = (HW - doorW) / 2;
+for (const sx of [-(doorW / 2 + frontSegW / 2), doorW / 2 + frontSegW / 2]) {
+  const seg = new THREE.Mesh(new THREE.BoxGeometry(frontSegW, WALL_H, HT), wallMat);
+  seg.position.set(sx, FLOOR_Y + WALL_H / 2, HD / 2);
+  seg.castShadow = true;
+  seg.receiveShadow = true;
+  house.add(seg);
+}
+const header = new THREE.Mesh(new THREE.BoxGeometry(doorW, WALL_H - doorH, HT), postMat);
+header.position.set(0, FLOOR_Y + doorH + (WALL_H - doorH) / 2, HD / 2);
+header.castShadow = true;
+house.add(header);
+
+const backWall = new THREE.Mesh(new THREE.BoxGeometry(HW, WALL_H, HT), wallMat);
+backWall.position.set(0, FLOOR_Y + WALL_H / 2, -HD / 2);
+backWall.castShadow = true;
+backWall.receiveShadow = true;
+house.add(backWall);
+
+for (const wx of [-HW/2, HW/2]) {
+  const lower = new THREE.Mesh(new THREE.BoxGeometry(HT, 0.9, HD), wallMat);
+  lower.position.set(wx, FLOOR_Y + 0.45, 0);
+  lower.castShadow = true;
+  house.add(lower);
+  const upper = new THREE.Mesh(new THREE.BoxGeometry(HT, WALL_H - 1.9, HD), postMat);
+  upper.position.set(wx, FLOOR_Y + 1.9 + (WALL_H - 1.9) / 2, 0);
+  upper.castShadow = true;
+  house.add(upper);
+  const shoji = new THREE.Mesh(new THREE.BoxGeometry(HT - 0.08, 1.0, HD - 0.6), shojiMat);
+  shoji.position.set(wx, FLOOR_Y + 1.4, 0);
+  house.add(shoji);
+}
+
+const ceiling = new THREE.Mesh(new THREE.BoxGeometry(HW, 0.15, HD), postMat);
+ceiling.position.y = FLOOR_Y + WALL_H + 0.07;
+ceiling.castShadow = true;
+ceiling.receiveShadow = true;
+house.add(ceiling);
+
+for (const sz of [0, -HD/2, HD/2]) {
+  const beam = new THREE.Mesh(new THREE.BoxGeometry(HW + 0.3, 0.2, 0.3), postMat);
+  beam.position.set(0, FLOOR_Y + WALL_H + 0.1, sz);
+  beam.castShadow = true;
+  house.add(beam);
+}
+
+const rise = 1.8, halfSpan = HD / 2 + 0.8;
+const slopeLen = Math.hypot(halfSpan, rise);
+const roofAngle = Math.atan2(rise, halfSpan);
+for (const side of [1, -1]) {
+  const slope = new THREE.Mesh(new THREE.BoxGeometry(HW + 1.6, 0.16, slopeLen), roofMat);
+  slope.rotation.x = side * roofAngle;
+  slope.position.set(0, FLOOR_Y + WALL_H + rise / 2 - 0.1, (side * halfSpan) / 2);
+  slope.castShadow = true;
+  house.add(slope);
+}
+const ridge = new THREE.Mesh(new THREE.BoxGeometry(HW + 1.8, 0.22, 0.4), roofMat);
+ridge.position.set(0, FLOOR_Y + WALL_H + rise - 0.1, 0);
+ridge.castShadow = true;
+house.add(ridge);
+
+const gableShape = new THREE.Shape();
+gableShape.moveTo(-HW / 2, 0);
+gableShape.lineTo(HW / 2, 0);
+gableShape.lineTo(0, rise);
+gableShape.closePath();
+for (const gz of [HD / 2, -HD / 2]) {
+  const gable = new THREE.Mesh(new THREE.ExtrudeGeometry(gableShape, { depth: 0.12, bevelEnabled: false }), wallMat);
+  gable.position.set(0, FLOOR_Y + WALL_H, gz - 0.06);
+  gable.castShadow = true;
+  house.add(gable);
+}
+
+const cushion = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.36, 0.4, 0.14, 16),
+  new THREE.MeshStandardMaterial({ color: 0x5a2b2b, roughness: 1 })
+);
+cushion.position.set(0, FLOOR_Y + 0.08, -0.7);
+cushion.castShadow = true;
+house.add(cushion);
+
+const lantern = new THREE.Mesh(
+  new THREE.SphereGeometry(0.13, 10, 10),
+  new THREE.MeshStandardMaterial({ color: 0xffd9a0, emissive: 0xffb870, emissiveIntensity: 1.5 })
+);
+lantern.position.set(0, FLOOR_Y + WALL_H - 0.4, -0.7);
+house.add(lantern);
+const lanternLight = new THREE.PointLight(0xffc98a, 8, 12, 2);
+lanternLight.position.copy(lantern.position);
+house.add(lanternLight);
+
+scene.add(house);
+
+// ---------- House collision ----------
+const colliders = [
+  { x1: -HW/2 - 0.3, x2: -doorW/2 + 0.05, z1: HD/2 - 0.3, z2: HD/2 + 0.3 },
+  { x1: doorW/2 - 0.05, x2: HW/2 + 0.3, z1: HD/2 - 0.3, z2: HD/2 + 0.3 },
+  { x1: -HW/2 - 0.3, x2: HW/2 + 0.3, z1: -HD/2 - 0.3, z2: -HD/2 + 0.3 },
+  { x1: -HW/2 - 0.3, x2: -HW/2 + 0.3, z1: -HD/2 - 0.3, z2: HD/2 + 0.3 },
+  { x1: HW/2 - 0.3, x2: HW/2 + 0.3, z1: -HD/2 - 0.3, z2: HD/2 + 0.3 },
+];
+
+function inCollider(x, z, r = 0.35) {
+  for (const c of colliders) {
+    if (x > c.x1 - r && x < c.x2 + r && z > c.z1 - r && z < c.z2 + r) return true;
+  }
+  return false;
+}
+
+// ---------- Meditation UI ----------
+const styleEl = document.createElement('style');
+styleEl.textContent = `
+  #medBtn {
+    position: fixed; right: 24px; bottom: 24px;
+    padding: 12px 20px; border: none; border-radius: 24px;
+    background: rgba(30,30,30,0.65); color: #fff;
+    font-size: 16px; font-family: sans-serif;
+    display: none; z-index: 20; backdrop-filter: blur(4px);
+  }
+  #medOverlay {
+    position: fixed; inset: 0; display: none; z-index: 15;
+    background: radial-gradient(circle at center, transparent 30%, rgba(10,12,18,0.55) 100%);
+    pointer-events: none;
+  }
+  #medRing {
+    position: absolute; left: 50%; top: 42%;
+    width: 120px; height: 120px; margin: -60px;
+    border-radius: 50%; border: 2px solid rgba(255,255,255,0.5);
+    animation: breathe 8s ease-in-out infinite;
+  }
+  #medText {
+    position: absolute; left: 50%; top: 42%; transform: translate(-50%, 90px);
+    color: rgba(255,255,255,0.85); font-family: sans-serif; font-size: 18px;
+    letter-spacing: 3px;
+  }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.35); opacity: 0.9; }
+  }
+`;
+document.head.appendChild(styleEl);
+
+const medBtn = document.createElement('button');
+medBtn.id = 'medBtn';
+medBtn.textContent = '🧘 Meditate';
+medBtn.onclick = () => (meditating ? stopMeditate() : startMeditate());
+document.body.appendChild(medBtn);
+
+const medOverlay = document.createElement('div');
+medOverlay.id = 'medOverlay';
+medOverlay.innerHTML = '<div id="medRing"></div><div id="medText">breathe</div>';
+document.body.appendChild(medOverlay);
+const medText = medOverlay.querySelector('#medText');
+
+function startMeditate() {
+  meditating = true;
+  medBtn.textContent = '🧍 Stand up';
+  medOverlay.style.display = 'block';
+}
+
+function stopMeditate() {
+  meditating = false;
+  medBtn.textContent = '🧘 Meditate';
+  medOverlay.style.display = 'none';
+}
+
+addEventListener('keydown', () => { if (meditating) stopMeditate(); });
+
 // ---------- Controls (pointer-look + WASD) ----------
 const keys = {};
 addEventListener('keydown', (e) => (keys[e.code] = true));
@@ -498,6 +740,18 @@ function animate() {
     if (cloud.position.x > 260) cloud.position.x = -260;
   }
 
+  const insideHouse =
+    Math.abs(camera.position.x) < HW / 2 &&
+    Math.abs(camera.position.z) < HD / 2 + 0.5;
+  medBtn.style.display = insideHouse && !meditating ? 'block' : 'none';
+
+  if (meditating) {
+    const targetY = FLOOR_Y + 0.9;
+    camera.position.y += (targetY - camera.position.y) * Math.min(1, dt * 2.5);
+    pitch += (-0.35 - pitch) * Math.min(1, dt * 2);
+    const cycle = (windUniform.value % 8) / 8;
+    medText.textContent = cycle < 0.4 ? 'breathe in' : cycle < 0.5 ? 'hold' : cycle < 0.9 ? 'breathe out' : 'hold';
+  } else {
   forward.set(Math.sin(yaw), 0, Math.cos(yaw)).multiplyScalar(-1);
   velocity.set(0, 0, 0);
   const speed = 20;
@@ -513,10 +767,16 @@ function animate() {
   if (keys['KeyQ']) camera.position.y -= speed * dt;
   if (keys['KeyE']) camera.position.y += speed * dt;
   if (velocity.lengthSq() > 0) {
-    velocity.normalize().multiplyScalar(speed * dt);
-    camera.position.add(velocity);
+    const move = velocity.clone().normalize().multiplyScalar(speed * dt);
+    const nx = camera.position.x + move.x;
+    const nz = camera.position.z + move.z;
+    if (!inCollider(nx, camera.position.z)) camera.position.x = nx;
+    if (!inCollider(camera.position.x, nz)) camera.position.z = nz;
   }
-  if (camera.position.y < eyeHeight * 0.5) camera.position.y = eyeHeight * 0.5;
+  const eyeTarget = insideHouse ? FLOOR_Y + 1.6 : eyeHeight;
+  if (Math.abs(camera.position.y - eyeTarget) > 0.01) {
+    camera.position.y += (eyeTarget - camera.position.y) * Math.min(1, dt * 8);
+  }
   camera.position.x = Math.max(-130, Math.min(130, camera.position.x));
   camera.position.z = Math.max(-130, Math.min(130, camera.position.z));
   camera.position.y = Math.max(camera.position.y, 1.5);
@@ -525,6 +785,7 @@ function animate() {
     const k = FOREST_RADIUS / groundDist;
     camera.position.x *= k;
     camera.position.z *= k;
+  }
   }
 
   const look = new THREE.Vector3(

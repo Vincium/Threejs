@@ -1,11 +1,11 @@
 #!/bin/bash
-# Stamp the current UTC timestamp into main.js before committing
+# Refresh the BUILD_TIME stamp in main.js with the current UTC timestamp
 set -e
 cd "$(dirname "$0")"
 STAMP="$(date -u '+%Y-%m-%d %H:%M UTC')"
-sed -i "s/__BUILD_TIME__/$STAMP/" main.js
-if grep -q '__BUILD_TIME__' main.js; then
-  echo "ERROR: placeholder replacement failed" >&2
+sed -i "s/const BUILD_TIME = '[^']*';/const BUILD_TIME = '$STAMP';/" main.js
+if ! grep -q "const BUILD_TIME = '$STAMP';" main.js; then
+  echo "ERROR: stamp replacement failed" >&2
   exit 1
 fi
 echo "Stamped: $STAMP"

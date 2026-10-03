@@ -25,7 +25,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-const BUILD_TIME = '2026-10-03 19:18 UTC';
+const BUILD_TIME = '2026-10-03 19:26 UTC';
 const FLOOR_Y = 0.32;
 const HW = 8, HD = 6, WALL_H = 2.4, HT = 0.24;
 const info = document.getElementById('info');

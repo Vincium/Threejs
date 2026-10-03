@@ -11,6 +11,19 @@ camera.position.set(0, 6, 30);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+// Block mobile browser gestures (pinch zoom, double-tap zoom, pull-to-refresh)
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+document.addEventListener('dblclick', (e) => e.preventDefault());
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive: false });
+document.addEventListener('touchmove', (e) => {
+  if (e.target === renderer.domElement || e.target === stickBase) e.preventDefault();
+}, { passive: false });
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
@@ -551,11 +564,13 @@ function inCollider(x, z, r = 0.35) {
 const styleEl = document.createElement('style');
 styleEl.textContent = `
   #medBtn {
-    position: fixed; right: 24px; bottom: 24px;
-    padding: 12px 20px; border: none; border-radius: 24px;
-    background: rgba(30,30,30,0.65); color: #fff;
-    font-size: 16px; font-family: sans-serif;
+    position: fixed; right: max(24px, env(safe-area-inset-right));
+    bottom: max(24px, env(safe-area-inset-bottom));
+    padding: 16px 26px; border: none; border-radius: 28px;
+    background: rgba(30,30,30,0.7); color: #fff;
+    font-size: 17px; font-family: sans-serif;
     display: none; z-index: 20; backdrop-filter: blur(4px);
+    touch-action: manipulation; min-height: 52px;
   }
   #medOverlay {
     position: fixed; inset: 0; display: none; z-index: 15;
@@ -563,19 +578,20 @@ styleEl.textContent = `
     pointer-events: none;
   }
   #medRing {
-    position: absolute; left: 50%; top: 42%;
-    width: 120px; height: 120px; margin: -60px;
+    position: absolute; left: 50%; top: 40%;
+    width: min(38vw, 160px); height: min(38vw, 160px);
+    transform: translate(-50%, -50%);
     border-radius: 50%; border: 2px solid rgba(255,255,255,0.5);
     animation: breathe 8s ease-in-out infinite;
   }
   #medText {
-    position: absolute; left: 50%; top: 42%; transform: translate(-50%, 90px);
-    color: rgba(255,255,255,0.85); font-family: sans-serif; font-size: 18px;
+    position: absolute; left: 50%; top: 40%; transform: translate(-50%, min(19vw, 80px));
+    color: rgba(255,255,255,0.9); font-family: sans-serif; font-size: clamp(16px, 4.5vw, 22px);
     letter-spacing: 3px;
   }
   @keyframes breathe {
-    0%, 100% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.35); opacity: 0.9; }
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.35); opacity: 0.9; }
   }
 `;
 document.head.appendChild(styleEl);
@@ -622,8 +638,10 @@ const stickBase = document.createElement('div');
 const stickKnob = document.createElement('div');
 if (isTouch) {
   const baseStyle = {
-    position: 'fixed', left: '24px', bottom: '24px',
-    width: '110px', height: '110px', borderRadius: '50%',
+    position: 'fixed',
+    left: 'max(24px, env(safe-area-inset-left))',
+    bottom: 'max(24px, env(safe-area-inset-bottom))',
+    width: 'min(30vw, 130px)', height: 'min(30vw, 130px)', borderRadius: '50%',
     background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.4)',
     touchAction: 'none', pointerEvents: 'auto', zIndex: 10,
   };
@@ -638,8 +656,8 @@ if (isTouch) {
   document.body.appendChild(stickBase);
 }
 
-const STICK_RADIUS = 40;
 let stickId = null, stickCenter = { x: 0, y: 0 };
+const getStickRadius = () => (stickBase.getBoundingClientRect().width / 2) * 0.72;
 
 function setKnob(dx, dy) {
   stickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
@@ -651,6 +669,7 @@ if (isTouch) {
     const r = stickBase.getBoundingClientRect();
     stickCenter = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
     stickBase.setPointerCapture(e.pointerId);
+    stickBase.dataset.radius = getStickRadius();
     touchMove.active = true;
     e.preventDefault();
   });
@@ -659,12 +678,13 @@ if (isTouch) {
     let dx = e.clientX - stickCenter.x;
     let dy = e.clientY - stickCenter.y;
     const len = Math.hypot(dx, dy);
-    if (len > STICK_RADIUS) {
-      dx = (dx / len) * STICK_RADIUS;
-      dy = (dy / len) * STICK_RADIUS;
+    const R = Number(stickBase.dataset.radius) || 40;
+    if (len > R) {
+      dx = (dx / len) * R;
+      dy = (dy / len) * R;
     }
-    touchMove.x = dx / STICK_RADIUS;
-    touchMove.y = dy / STICK_RADIUS;
+    touchMove.x = dx / R;
+    touchMove.y = dy / R;
     setKnob(dx, dy);
     e.preventDefault();
   });
@@ -805,3 +825,8 @@ addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 });
+if (visualViewport) {
+  visualViewport.addEventListener('resize', () => {
+    renderer.setSize(visualViewport.width, visualViewport.height);
+  });
+}

@@ -29,10 +29,22 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
       }
     }
+  </script>
+  <script>
+    window.addEventListener('error', (e) => {
+      const el = document.createElement('div');
+      el.textContent = 'Failed to load: ' + (e.message || 'check your connection');
+      Object.assign(el.style, {
+        position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+        background: 'rgba(0,0,0,0.7)', color: '#fff', padding: '12px 18px',
+        borderRadius: '8px', fontFamily: 'sans-serif', zIndex: 99
+      });
+      document.body.appendChild(el);
+    });
   </script>
   <script type="module" src="./main.js"></script>
 </body>

@@ -3,7 +3,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87ceeb);
-scene.fog = new THREE.Fog(0x87ceeb, 40, 140);
+scene.fog = new THREE.Fog(0x87ceeb, 40, 260);
 
 const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 500);
 camera.position.set(0, 6, 30);
@@ -254,6 +254,63 @@ for (let i = 0; i < grassCount; i++) {
 grass.instanceMatrix.needsUpdate = true;
 scene.add(grass);
 
+// ---------- Mountains (Level 3 ring) ----------
+const FOREST_RADIUS = 118;
+const MOUNTAIN_RING = 150;
+const ROCK = new THREE.Color(0x7d7468);
+const SNOW = new THREE.Color(0xf4f6f8);
+const FOREST_EDGE = new THREE.Color(0x3f5a2e);
+
+function makeMountainGeometry(radius, height) {
+  const geo = new THREE.ConeGeometry(radius, height, 48, 8, true);
+  geo.translate(0, height / 2, 0);
+  const pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+    const t = y / height;
+    const noise =
+      Math.sin(x * 0.35 + z * 0.2) * 0.5 +
+      Math.sin(z * 0.42 + x * 0.13) * 0.5 +
+      Math.sin((x + z) * 0.21) * 0.8;
+    const scale = 1 + noise * 0.15 * (1 - t);
+    pos.setXYZ(i, x * scale, y, z * scale);
+  }
+  geo.computeVertexNormals();
+  const count = pos.count;
+  const colors = new Float32Array(count * 3);
+  const c = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    const t = pos.getY(i) / height;
+    if (t < 0.25) c.copy(FOREST_EDGE).lerp(ROCK, t / 0.25);
+    else if (t < 0.55) c.copy(ROCK);
+    else c.copy(ROCK).lerp(SNOW, (t - 0.55) / 0.45);
+    colors[i * 3] = c.r;
+    colors[i * 3 + 1] = c.g;
+    colors[i * 3 + 2] = c.b;
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  return geo;
+}
+
+const mountainMat = new THREE.MeshStandardMaterial({
+  color: 0xffffff,
+  vertexColors: true,
+  roughness: 1,
+  flatShading: true,
+  side: THREE.DoubleSide,
+});
+const mountainCount = 14;
+for (let i = 0; i < mountainCount; i++) {
+  const angle = (i / mountainCount) * Math.PI * 2 + rand(-0.15, 0.15);
+  const dist = MOUNTAIN_RING + rand(-15, 15);
+  const height = rand(35, 65);
+  const geo = makeMountainGeometry(rand(30, 50), height);
+  const m = new THREE.Mesh(geo, mountainMat);
+  m.position.set(Math.cos(angle) * dist, -4, Math.sin(angle) * dist);
+  m.rotation.y = rand(0, Math.PI * 2);
+  scene.add(m);
+}
+
 // ---------- Rocks ----------
 const rockGeo = new THREE.DodecahedronGeometry(0.6, 0);
 const rockMat = new THREE.MeshStandardMaterial({ color: 0x8a8a8a, roughness: 1, flatShading: true });
@@ -418,6 +475,12 @@ function animate() {
   camera.position.x = Math.max(-130, Math.min(130, camera.position.x));
   camera.position.z = Math.max(-130, Math.min(130, camera.position.z));
   camera.position.y = Math.max(camera.position.y, 1.5);
+  const groundDist = Math.hypot(camera.position.x, camera.position.z);
+  if (groundDist > FOREST_RADIUS) {
+    const k = FOREST_RADIUS / groundDist;
+    camera.position.x *= k;
+    camera.position.z *= k;
+  }
 
   const look = new THREE.Vector3(
     Math.sin(yaw) * Math.cos(pitch),

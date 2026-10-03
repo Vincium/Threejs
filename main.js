@@ -25,9 +25,9 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-const BUILD_TIME = '2026-10-03 19:26 UTC';
+const BUILD_TIME = '2026-10-03 19:52 UTC';
 const FLOOR_Y = 0.32;
-const HW = 8, HD = 6, WALL_H = 2.4, HT = 0.24;
+const HW = 8, HD = 6, WALL_H = 3.0, HT = 0.24;
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -391,6 +391,8 @@ const roofMat = new THREE.MeshStandardMaterial({ color: 0x35393f, roughness: 1, 
 const shojiMat = new THREE.MeshStandardMaterial({
   color: 0xf7efdc, roughness: 0.8, emissive: 0x554c33, emissiveIntensity: 0.25, side: THREE.DoubleSide,
 });
+const darkWoodMat = new THREE.MeshStandardMaterial({ color: 0x241a10, roughness: 0.85 });
+const tatamiEdgeMat = new THREE.MeshStandardMaterial({ color: 0x2c261e, roughness: 1 });
 
 function makeTatamiTexture() {
   const c = document.createElement('canvas');
@@ -445,6 +447,26 @@ step.position.set(0, 0.09, HD / 2 + 0.5);
 step.castShadow = true;
 house.add(step);
 
+const engawa = new THREE.Mesh(new THREE.BoxGeometry(HW, 0.1, 1.4), postMat);
+engawa.position.set(0, FLOOR_Y + 0.05, HD / 2 + 0.7);
+engawa.castShadow = true;
+engawa.receiveShadow = true;
+house.add(engawa);
+
+const doorW = 1.9, doorH = 2.35;
+const doorMat = new THREE.MeshStandardMaterial({ color: 0xc9b28a, roughness: 0.7, side: THREE.DoubleSide });
+for (const dx of [-doorW / 2 + 0.02, doorW / 2 - 0.02]) {
+  const shojiDoor = new THREE.Mesh(new THREE.BoxGeometry(doorW / 2, doorH, 0.06), doorMat);
+  shojiDoor.position.set(dx, FLOOR_Y + doorH / 2, HD / 2 + 0.04);
+  shojiDoor.castShadow = true;
+  house.add(shojiDoor);
+  for (let g = 1; g <= 3; g++) {
+    const grid = new THREE.Mesh(new THREE.BoxGeometry(doorW / 2 - 0.1, 0.03, 0.08), darkWoodMat);
+    grid.position.set(dx, FLOOR_Y + (doorH / 4) * g, HD / 2 + 0.04);
+    house.add(grid);
+  }
+}
+
 const postGeo = new THREE.BoxGeometry(0.28, WALL_H, 0.28);
 for (const [px, pz] of [[-HW/2+0.14, HD/2-0.14], [HW/2-0.14, HD/2-0.14], [-HW/2+0.14, -HD/2+0.14], [HW/2-0.14, -HD/2+0.14], [0, HD/2-0.14], [0, -HD/2+0.14]]) {
   const post = new THREE.Mesh(postGeo, postMat);
@@ -453,7 +475,6 @@ for (const [px, pz] of [[-HW/2+0.14, HD/2-0.14], [HW/2-0.14, HD/2-0.14], [-HW/2+
   house.add(post);
 }
 
-const doorW = 1.8, doorH = 2.0;
 const frontSegW = (HW - doorW) / 2;
 for (const sx of [-(doorW / 2 + frontSegW / 2), doorW / 2 + frontSegW / 2]) {
   const seg = new THREE.Mesh(new THREE.BoxGeometry(frontSegW, WALL_H, HT), wallMat);
@@ -467,6 +488,76 @@ header.position.set(0, FLOOR_Y + doorH + (WALL_H - doorH) / 2, HD / 2);
 header.castShadow = true;
 house.add(header);
 
+const tokonoma = new THREE.Group();
+tokonoma.position.set(-HW / 2 + 1.1, 0, -HD / 2 + 1.2);
+const alcoveFloor = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.1, 1.0), postMat);
+alcoveFloor.position.y = FLOOR_Y - 0.02;
+tokonoma.add(alcoveFloor);
+const alcovePost1 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.0, 0.12), darkWoodMat);
+alcovePost1.position.set(-1.0, FLOOR_Y + 0.5, 0.4);
+tokonoma.add(alcovePost1);
+const alcovePost2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.0, 0.12), darkWoodMat);
+alcovePost2.position.set(1.0, FLOOR_Y + 0.5, 0.4);
+tokonoma.add(alcovePost2);
+const alcoveLip = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 0.16), darkWoodMat);
+alcoveLip.position.set(0, FLOOR_Y + 1.0, 0.4);
+tokonoma.add(alcoveLip);
+const scroll = new THREE.Mesh(
+  new THREE.PlaneGeometry(0.5, 1.1),
+  new THREE.MeshStandardMaterial({ color: 0xefe6ce, roughness: 1 })
+);
+scroll.position.set(0, FLOOR_Y + 1.6, 0.2);
+tokonoma.add(scroll);
+const scrollTop = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.56, 8), darkWoodMat);
+scrollTop.rotation.z = Math.PI / 2;
+scrollTop.position.set(0, FLOOR_Y + 2.2, 0.2);
+tokonoma.add(scrollTop);
+const scrollBottom = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.56, 8), darkWoodMat);
+scrollBottom.rotation.z = Math.PI / 2;
+scrollBottom.position.set(0, FLOOR_Y + 1.05, 0.2);
+tokonoma.add(scrollBottom);
+const vase = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.09, 0.14, 0.42, 12),
+  new THREE.MeshStandardMaterial({ color: 0x3d5a80, roughness: 0.35 })
+);
+vase.position.set(0.7, FLOOR_Y + 0.26, -0.1);
+vase.castShadow = true;
+tokonoma.add(vase);
+for (let b = 0; b < 3; b++) {
+  const branch = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.012, 0.02, rand(0.5, 0.75), 5),
+    new THREE.MeshStandardMaterial({ color: 0x4a5d23, roughness: 1 })
+  );
+  branch.position.set(0.7, FLOOR_Y + 0.55 + b * 0.08, -0.1 + b * 0.04);
+  branch.rotation.z = rand(-0.4, 0.4);
+  tokonoma.add(branch);
+}
+house.add(tokonoma);
+
+const chabudai = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.06, 0.7), darkWoodMat);
+chabudai.position.set(1.4, FLOOR_Y + 0.32, 0.3);
+chabudai.castShadow = true;
+house.add(chabudai);
+for (const [lx, lz] of [[-0.42, -0.24], [0.42, -0.24], [-0.42, 0.24], [0.42, 0.24]]) {
+  const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.32, 8), darkWoodMat);
+  leg.position.set(1.4 + lx, FLOOR_Y + 0.16, 0.3 + lz);
+  house.add(leg);
+}
+const teapot = new THREE.Mesh(
+  new THREE.SphereGeometry(0.12, 12, 10),
+  new THREE.MeshStandardMaterial({ color: 0x4a3b2a, roughness: 0.4 })
+);
+teapot.position.set(1.4, FLOOR_Y + 0.44, 0.3);
+teapot.castShadow = true;
+house.add(teapot);
+const cup = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.045, 0.035, 0.07, 10),
+  new THREE.MeshStandardMaterial({ color: 0x8a3324, roughness: 0.3 })
+);
+cup.position.set(1.7, FLOOR_Y + 0.385, 0.45);
+cup.castShadow = true;
+house.add(cup);
+
 const backWall = new THREE.Mesh(new THREE.BoxGeometry(HW, WALL_H, HT), wallMat);
 backWall.position.set(0, FLOOR_Y + WALL_H / 2, -HD / 2);
 backWall.castShadow = true;
@@ -478,13 +569,18 @@ for (const wx of [-HW/2, HW/2]) {
   lower.position.set(wx, FLOOR_Y + 0.45, 0);
   lower.castShadow = true;
   house.add(lower);
-  const upper = new THREE.Mesh(new THREE.BoxGeometry(HT, WALL_H - 1.9, HD), postMat);
-  upper.position.set(wx, FLOOR_Y + 1.9 + (WALL_H - 1.9) / 2, 0);
+  const upper = new THREE.Mesh(new THREE.BoxGeometry(HT, WALL_H - 2.5, HD), postMat);
+  upper.position.set(wx, FLOOR_Y + 2.5 + (WALL_H - 2.5) / 2, 0);
   upper.castShadow = true;
   house.add(upper);
-  const shoji = new THREE.Mesh(new THREE.BoxGeometry(HT - 0.08, 1.0, HD - 0.6), shojiMat);
-  shoji.position.set(wx, FLOOR_Y + 1.4, 0);
+  const shoji = new THREE.Mesh(new THREE.BoxGeometry(HT - 0.08, 1.6, HD - 0.6), shojiMat);
+  shoji.position.set(wx, FLOOR_Y + 1.7, 0);
   house.add(shoji);
+  for (let fz = -HD / 2 + 0.8; fz <= HD / 2 - 0.8; fz += 0.8) {
+    const mullion = new THREE.Mesh(new THREE.BoxGeometry(HT - 0.02, 1.6, 0.05), darkWoodMat);
+    mullion.position.set(wx, FLOOR_Y + 1.7, fz);
+    house.add(mullion);
+  }
 }
 
 const ceiling = new THREE.Mesh(new THREE.BoxGeometry(HW, 0.15, HD), postMat);
@@ -531,17 +627,27 @@ const cushion = new THREE.Mesh(
   new THREE.CylinderGeometry(0.36, 0.4, 0.14, 16),
   new THREE.MeshStandardMaterial({ color: 0x5a2b2b, roughness: 1 })
 );
-cushion.position.set(0, FLOOR_Y + 0.08, -0.7);
+cushion.position.set(0.2, FLOOR_Y + 0.08, -1.4);
 cushion.castShadow = true;
 house.add(cushion);
+
+for (const zx of [-0.5, 1.4]) {
+  const zabuton = new THREE.Mesh(
+    new THREE.BoxGeometry(0.5, 0.06, 0.5),
+    new THREE.MeshStandardMaterial({ color: 0x4a2b2b, roughness: 1 })
+  );
+  zabuton.position.set(zx, FLOOR_Y + 0.05, 0.95);
+  zabuton.castShadow = true;
+  house.add(zabuton);
+}
 
 const lantern = new THREE.Mesh(
   new THREE.SphereGeometry(0.13, 10, 10),
   new THREE.MeshStandardMaterial({ color: 0xffd9a0, emissive: 0xffb870, emissiveIntensity: 1.5 })
 );
-lantern.position.set(0, FLOOR_Y + WALL_H - 0.4, -0.7);
+lantern.position.set(0, FLOOR_Y + WALL_H - 0.45, -1.4);
 house.add(lantern);
-const lanternLight = new THREE.PointLight(0xffc98a, 8, 12, 2);
+const lanternLight = new THREE.PointLight(0xffc98a, 8, 14, 2);
 lanternLight.position.copy(lantern.position);
 house.add(lanternLight);
 
@@ -774,7 +880,7 @@ function animate() {
     Math.abs(camera.position.z) < HD / 2 + 0.5;
 
   if (meditating) {
-    const targetY = (insideHouse ? FLOOR_Y : 0) + 0.9;
+    const targetY = (insideHouse ? FLOOR_Y : 0) + 1.0;
     camera.position.y += (targetY - camera.position.y) * Math.min(1, dt * 2.5);
     pitch += (-0.35 - pitch) * Math.min(1, dt * 2);
     const cycle = (windUniform.value % 8) / 8;
@@ -801,7 +907,7 @@ function animate() {
     if (!inCollider(nx, camera.position.z)) camera.position.x = nx;
     if (!inCollider(camera.position.x, nz)) camera.position.z = nz;
   }
-  const eyeTarget = insideHouse ? FLOOR_Y + 1.6 : eyeHeight;
+  const eyeTarget = insideHouse ? FLOOR_Y + 1.75 : eyeHeight;
   if (Math.abs(camera.position.y - eyeTarget) > 0.01) {
     camera.position.y += (eyeTarget - camera.position.y) * Math.min(1, dt * 8);
   }

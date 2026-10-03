@@ -146,7 +146,7 @@ function makeTreeGeometry() {
   return treeGeo;
 }
 
-const treeCount = 120;
+const treeCount = 220;
 const variantCount = 6;
 const treesPerVariant = Math.ceil(treeCount / variantCount);
 for (let v = 0; v < variantCount; v++) {
@@ -204,7 +204,7 @@ function makeBladeGeometry() {
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   geo.setIndex(indices);
   geo.computeVertexNormals();
-  geo.scale(1, 1.1, 1);
+  geo.scale(1, 0.55, 1);
   return geo;
 }
 
@@ -229,7 +229,7 @@ const bladeMat = new THREE.MeshStandardMaterial({
   },
 });
 
-const grassCount = 30000;
+const grassCount = 60000;
 const grass = new THREE.InstancedMesh(bladeGeo, bladeMat, grassCount);
 const dummy = new THREE.Object3D();
 const color = new THREE.Color();
@@ -247,7 +247,7 @@ for (let i = 0; i < grassCount; i++) {
   const z = rand(-90, 90);
   dummy.position.set(x, 0, z);
   dummy.rotation.set(rand(-0.15, 0.15), rand(0, Math.PI), rand(-0.15, 0.15));
-  dummy.scale.set(rand(0.6, 1.4), rand(0.6, 1.4), rand(0.6, 1.4));
+  dummy.scale.set(rand(0.6, 1.4), rand(0.5, 1.1), rand(0.6, 1.4));
   dummy.updateMatrix();
   grass.setMatrixAt(i, dummy.matrix);
 }

@@ -245,6 +245,7 @@ bladeGeo.setAttribute('color', new THREE.BufferAttribute(bladeColors, 3));
 for (let i = 0; i < grassCount; i++) {
   const x = rand(-90, 90);
   const z = rand(-90, 90);
+  if (Math.abs(x) < HW / 2 + 0.5 && Math.abs(z) < HD / 2 + 0.9) continue;
   dummy.position.set(x, 0, z);
   dummy.rotation.set(rand(-0.15, 0.15), rand(0, Math.PI), rand(-0.15, 0.15));
   dummy.scale.set(rand(0.6, 1.4), rand(0.5, 1.1), rand(0.6, 1.4));

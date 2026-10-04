@@ -6,6 +6,9 @@ export class Human {
     this.distance = distance;
     this.walkPhase = 0;
     this.group = this.build();
+    this.pos = new THREE.Vector3(0, 0, 30);
+    this.group.position.copy(this.pos);
+    this.facing = 0;
     scene.add(this.group);
   }
 
@@ -112,23 +115,34 @@ export class Human {
   }
 
   update(dt, camera, controls, { teaHouse, moving }) {
-    const look = controls.getLookDirection();
-    const flat = new THREE.Vector3(look.x, 0, look.z);
-    if (flat.lengthSq() < 1e-6) flat.set(0, 0, -1);
-    flat.normalize();
+    const ease = (v, t) => v + (t - v) * Math.min(1, dt * 10);
 
-    const cam = camera.position;
-    const px = cam.x + flat.x * this.distance;
-    const pz = cam.z + flat.z * this.distance;
-    const floorY = teaHouse.contains(px, pz) ? teaHouse.FLOOR_Y : 0;
-    this.group.position.set(px, floorY, pz);
-    this.group.rotation.y = Math.atan2(flat.x, flat.z) + Math.PI;
+    // Face the movement direction, then walk forward
+    if (moving) {
+      const move = controls.getMoveVector();
+      if (move.lengthSq() > 0) {
+        const targetFacing = Math.atan2(move.x, move.z);
+        let diff = targetFacing - this.facing;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        this.facing += diff * Math.min(1, dt * 10);
+      }
+    }
+
+    // Walk forward in the facing direction
+    const movingForward = moving && this.walkAmount > 0.5;
+    const forward = new THREE.Vector3(Math.sin(this.facing), 0, Math.cos(this.facing));
+    if (movingForward) {
+      this.pos.addScaledVector(forward, 9 * dt);
+    }
+
+    const floorY = teaHouse.contains(this.pos.x, this.pos.z) ? teaHouse.FLOOR_Y : 0;
+    this.group.position.set(this.pos.x, floorY, this.pos.z);
+    this.group.rotation.y = this.facing;
 
     this.head.rotation.x = THREE.MathUtils.clamp(controls.pitch, -0.6, 0.6);
 
-    const speed = moving ? 9 : 0;
     this.walkPhase += dt * (moving ? 8 : 0);
-    const ease = (v, t) => v + (t - v) * Math.min(1, dt * 10);
     this.walkAmount = ease(this.walkAmount || 0, moving ? 1 : 0);
 
     const a = Math.sin(this.walkPhase) * this.walkAmount;
@@ -144,6 +158,5 @@ export class Human {
     this.armR.elbow.rotation.x = -0.25 - Math.max(0, a) * 0.5;
 
     this.group.position.y += Math.abs(Math.sin(this.walkPhase)) * 0.04 * this.walkAmount;
-    void speed;
   }
 }

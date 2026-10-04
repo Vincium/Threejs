@@ -11,7 +11,7 @@ import { Controls } from './src/Controls.js';
 import { Player } from './src/Player.js';
 import { Human } from './src/Human.js';
 
-const BUILD_TIME = '2026-10-04 15:19 UTC';
+const BUILD_TIME = '2026-10-04 15:22 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -73,8 +73,9 @@ const controls = new Controls(renderer, {
 });
 addEventListener('keydown', () => { if (meditationUI.meditating) meditationUI.stop(); });
 
-const player = new Player(camera, controls);
 const human = new Human(scene);
+const humanCamDist = 3.2;
+const player = new Player(camera, controls, { body: human.pos, bodyHeight: 1.0 });
 meditationUI.onToggle = () => {
   player.meditating = meditationUI.meditating;
 };
@@ -92,6 +93,17 @@ function animate() {
   player.update(dt, { teaHouse, court, windTime: windUniform.value });
   const moving = !player.meditating && controls.getMoveVector().lengthSq() > 0;
   human.update(dt, camera, controls, { teaHouse, moving });
+
+  // Third-person camera: lag behind the human
+  {
+    const flat = new THREE.Vector3(Math.sin(human.facing), 0, Math.cos(human.facing));
+    const camTargetPos = human.pos.clone().addScaledVector(flat, -humanCamDist).add(new THREE.Vector3(0, 2.2, 0));
+    camera.position.lerp(camTargetPos, Math.min(1, dt * 2.5));
+    const lookTarget = human.pos.clone().add(new THREE.Vector3(0, 1.4, 0));
+    const smoothLook = camera.userData.smoothLook || (camera.userData.smoothLook = lookTarget.clone());
+    smoothLook.lerp(lookTarget, Math.min(1, dt * 3));
+    camera.lookAt(smoothLook);
+  }
   if (meditationUI.meditating) {
     meditationUI.updateBreathText(windUniform.value);
   }

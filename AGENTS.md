@@ -1,5 +1,13 @@
 # Agent Guidelines
 
+## Architecture: object-oriented programming
+
+Follow the existing OOP architecture: each concern lives in an ES class in `src/`
+(e.g. `Player`, `Controls`, `TeaHouse`, `Forest`, `Sky`, `GrassField`, `Terrain`, `MeditationUI`),
+and `main.js` stays a slim orchestrator that wires the instances together.
+New features should be added as classes (or methods on the relevant existing class),
+not as loose top-level functions or procedural code.
+
 ## Build timestamp
 
 `main.js` contains a `BUILD_TIME` constant shown in the on-screen info bar.

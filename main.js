@@ -9,8 +9,9 @@ import { TennisCourt } from './src/TennisCourt.js';
 import { MeditationUI } from './src/UI.js';
 import { Controls } from './src/Controls.js';
 import { Player } from './src/Player.js';
+import { Human } from './src/Human.js';
 
-const BUILD_TIME = '2026-10-04 15:06 UTC';
+const BUILD_TIME = '2026-10-04 15:19 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -73,6 +74,7 @@ const controls = new Controls(renderer, {
 addEventListener('keydown', () => { if (meditationUI.meditating) meditationUI.stop(); });
 
 const player = new Player(camera, controls);
+const human = new Human(scene);
 meditationUI.onToggle = () => {
   player.meditating = meditationUI.meditating;
 };
@@ -88,6 +90,8 @@ function animate() {
   clouds.update(dt);
   controls.update(dt);
   player.update(dt, { teaHouse, court, windTime: windUniform.value });
+  const moving = !player.meditating && controls.getMoveVector().lengthSq() > 0;
+  human.update(dt, camera, controls, { teaHouse, moving });
   if (meditationUI.meditating) {
     meditationUI.updateBreathText(windUniform.value);
   }

@@ -154,7 +154,7 @@ makeChainLinkTexture() {
   buildFence() {
     const halfL = COURT_LENGTH / 2 + RUNOFF_END;
     const halfW = COURT_WIDTH / 2 + RUNOFF_SIDE;
-    const gateHalf = 0.6;
+    const gateHalf = 0.75;
     const postSpacing = 2.5;
     const addPosts = (alongZ, fixed, from, to, h = FENCE_HEIGHT) => {
       const n = Math.max(1, Math.ceil((to - from) / postSpacing));
@@ -185,22 +185,17 @@ makeChainLinkTexture() {
       this.box(alongZ ? 0.06 : len, 0.06, alongZ ? len : 0.06, this.mats.frame,
         alongZ ? fixed : mid, h, alongZ ? mid : fixed, this.group, false);
     };
-    // long sides at x = ±halfW
+    // long sides at x = ±halfW, with an opening at mid-court (z = 0, beside the net)
     for (const sx of [-halfW, halfW]) {
       addPosts(true, sx, -halfL, halfL, SIDE_FENCE_HEIGHT);
-      addFence(true, sx, -halfL, halfL, SIDE_FENCE_HEIGHT);
+      addFence(true, sx, -halfL, -gateHalf, SIDE_FENCE_HEIGHT);
+      addFence(true, sx, gateHalf, halfL, SIDE_FENCE_HEIGHT);
     }
-    // end at z = -halfL, full
+    // ends at z = ±halfL, full
     addPosts(false, -halfL, -halfW, halfW);
     addFence(false, -halfL, -halfW, halfW);
-    // end at z = +halfL with gate opening at x = 0
     addPosts(false, halfL, -halfW, halfW);
-    addFence(false, halfL, -halfW, -gateHalf);
-    addFence(false, halfL, gateHalf, halfW);
-    // gate door, slightly ajar
-    const gate = this.box(0.05, FENCE_HEIGHT * 0.95, gateHalf * 2, this.mats.gate,
-      gateHalf, FENCE_HEIGHT * 0.475, halfL, this.group, false);
-    gate.rotation.y = 0.5;
+    addFence(false, halfL, -halfW, halfW);
   }
 
   buildColliders() {
@@ -208,10 +203,10 @@ makeChainLinkTexture() {
     const halfW = COURT_WIDTH / 2 + RUNOFF_SIDE;
     const gateHalf = 0.6;
     this.colliders = [
-      { x1: -halfW - 0.2, x2: -halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2 },
-      { x1: halfW - 0.2, x2: halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2 },
+      { x1: -halfW - 0.2, x2: -halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2, gate: true },
+      { x1: halfW - 0.2, x2: halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2, gate: true },
       { x1: -halfW - 0.2, x2: halfW + 0.2, z1: -halfL - 0.2, z2: -halfL + 0.2 },
-      { x1: -halfW - 0.2, x2: halfW + 0.2, z1: halfL - 0.2, z2: halfL + 0.2, gate: true },
+      { x1: -halfW - 0.2, x2: halfW + 0.2, z1: halfL - 0.2, z2: halfL + 0.2 },
     ];
     this.gateHalf = gateHalf;
   }
@@ -220,7 +215,7 @@ makeChainLinkTexture() {
     const x = wx - this.originX;
     const z = wz - this.originZ;
     for (const c of this.colliders) {
-      if (c.gate && Math.abs(x) < this.gateHalf - r * 0.5) continue;
+      if (c.gate && Math.abs(z) < this.gateHalf - r * 0.5) continue;
       if (x > c.x1 - r && x < c.x2 + r && z > c.z1 - r && z < c.z2 + r) return true;
     }
     return false;

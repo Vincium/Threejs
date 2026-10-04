@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { rand, createWindSwayMaterial } from './utils.js?v=20261004181606';
+import { rand, createWindSwayMaterial } from './utils.js?v=20261004181811';
 
 export class GrassField {
   constructor(scene, { count = 240000, spread = 90, heightScale = 0.275, excludeArea = null, terrain = null, lodRadius = 45 } = {}) {
@@ -23,6 +23,7 @@ export class GrassField {
     this.farMesh = new THREE.InstancedMesh(farGeo, makeMat(), count);
     for (const m of [this.nearMesh, this.farMesh]) {
       m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      m.frustumCulled = false;
       scene.add(m);
     }
     this.blades = [];

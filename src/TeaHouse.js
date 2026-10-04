@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { rand } from './utils.js?v=20261004181606';
+import { rand } from './utils.js?v=20261004181811';
 
 export class TeaHouse {
   constructor(scene, options = {}) {

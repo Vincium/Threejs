@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { windUniform } from './src/utils.js?v=20261004181606';
-import { Terrain, Rocks } from './src/Terrain.js?v=20261004181606';
-import { Forest } from './src/Forest.js?v=20261004181606';
-import { GrassField } from './src/GrassField.js?v=20261004181606';
-import { Mountains, Clouds } from './src/Sky.js?v=20261004181606';
-import { TeaHouse } from './src/TeaHouse.js?v=20261004181606';
-import { TennisCourt } from './src/TennisCourt.js?v=20261004181606';
-import { MeditationUI } from './src/UI.js?v=20261004181606';
-import { Controls } from './src/Controls.js?v=20261004181606';
-import { Player } from './src/Player.js?v=20261004181606';
-import { Human } from './src/Human.js?v=20261004181606';
+import { windUniform } from './src/utils.js?v=20261004181811';
+import { Terrain, Rocks } from './src/Terrain.js?v=20261004181811';
+import { Forest } from './src/Forest.js?v=20261004181811';
+import { GrassField } from './src/GrassField.js?v=20261004181811';
+import { Mountains, Clouds } from './src/Sky.js?v=20261004181811';
+import { TeaHouse } from './src/TeaHouse.js?v=20261004181811';
+import { TennisCourt } from './src/TennisCourt.js?v=20261004181811';
+import { MeditationUI } from './src/UI.js?v=20261004181811';
+import { Controls } from './src/Controls.js?v=20261004181811';
+import { Player } from './src/Player.js?v=20261004181811';
+import { Human } from './src/Human.js?v=20261004181811';
 
-const BUILD_TIME = '2026-10-04 18:16 UTC';
+const BUILD_TIME = '2026-10-04 18:18 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;

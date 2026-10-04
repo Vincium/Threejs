@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { rand, createWindSwayMaterial } from './utils.js?v=20261004174038';
+import { rand, createWindSwayMaterial } from './utils.js?v=20261004181244';
 
 export class GrassField {
   constructor(scene, { count = 240000, spread = 90, heightScale = 0.275, excludeArea = null, terrain = null, lodRadius = 45 } = {}) {
@@ -12,7 +12,7 @@ export class GrassField {
       transformed.x += sin(uTime * 2.0 + phase) * 0.18 * bladeH * bladeH;
       transformed.z += cos(uTime * 1.6 + phase * 1.3) * 0.1 * bladeH * bladeH;`;
     const nearGeo = this.makeBladeGeometry(heightScale, 7, 0.05);
-    const farGeo = this.makeBladeGeometry(heightScale * 1.4, 3, 0.12);
+    const farGeo = this.makeBladeGeometry(heightScale, 3, 0.05);
     this.applyBladeGradient(nearGeo);
     this.applyBladeGradient(farGeo);
     const makeMat = () => createWindSwayMaterial(

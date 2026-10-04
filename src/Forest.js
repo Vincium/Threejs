@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { rand, addVertexColors, createWindSwayMaterial } from './utils.js?v=20261004174038';
+import { rand, addVertexColors, createWindSwayMaterial } from './utils.js?v=20261004181244';
 
 export class Forest {
   constructor(scene, { treeCount = 320, variantCount = 6, spread = 120, clearing = 8, excludeArea = null, lodRadius = 60 } = {}) {
@@ -38,8 +38,12 @@ export class Forest {
       placed++;
     }
     for (let v = 0; v < variantCount; v++) {
-      const nearGeo = this.makeTreeGeometry();
-      const farGeo = this.makeLowTreeGeometry();
+      const skeleton = [];
+      this.makeBranchSkeleton(skeleton, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0), 2.4, 0.28, 0);
+      const barkColor = new THREE.Color().setHSL(0.07, 0.35, rand(0.2, 0.3));
+      const leafColor = new THREE.Color().setHSL(0.3 + rand(-0.04, 0.03), 0.5, rand(0.25, 0.38));
+      const nearGeo = this.makeTreeGeometry(skeleton, false, barkColor, leafColor);
+      const farGeo = this.makeTreeGeometry(skeleton, true, barkColor, leafColor);
       const nearMesh = new THREE.InstancedMesh(nearGeo, this.material, perVariant[v].length);
       const farMesh = new THREE.InstancedMesh(farGeo, this.material, perVariant[v].length);
       for (const m of [nearMesh, farMesh]) {
@@ -52,7 +56,6 @@ export class Forest {
       this.farMeshes.push(farMesh);
       for (const t of perVariant[v]) this.trees.push({ ...t, variant: v });
     }
-    this.variantCounts = perVariant.map((a) => a.length);
     this.lastX = null;
     this.lastZ = null;
     this.refresh(0, 30);
@@ -89,53 +92,36 @@ export class Forest {
     return false;
   }
 
-  makeTreeGeometry() {
-    const parts = [];
-    this.makeBranchParts(parts, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0), 2.4, 0.28, 0);
-
-    const barkColor = new THREE.Color().setHSL(0.07, 0.35, rand(0.2, 0.3));
-    const leafColor = new THREE.Color().setHSL(0.3 + rand(-0.04, 0.03), 0.5, rand(0.25, 0.38));
+  makeTreeGeometry(skeleton, low, barkColor, leafColor) {
     const jitter = () => rand(-0.04, 0.04);
 
-    const trunkGeos = parts
+    const trunkGeos = skeleton
       .filter((p) => !p.isLeaf)
-      .map((p) => addVertexColors(p.geo, () => barkColor.clone().offsetHSL(0, 0, jitter())));
-    const leafGeos = parts
+      .map((p) => addVertexColors(this.makeBranchGeometry(p, low), () => barkColor.clone().offsetHSL(0, 0, jitter())));
+    const leafGeos = skeleton
       .filter((p) => p.isLeaf)
-      .map((p) => addVertexColors(p.geo, () => leafColor.clone().offsetHSL(jitter(), 0, jitter())));
+      .map((p) => addVertexColors(p.geo.clone(), () => leafColor.clone().offsetHSL(jitter(), 0, jitter())));
 
     const treeGeo = mergeGeometries([...trunkGeos, ...leafGeos]);
     treeGeo.computeVertexNormals();
     return treeGeo;
   }
 
-  makeLowTreeGeometry() {
-    const barkColor = new THREE.Color().setHSL(0.07, 0.35, 0.25);
-    const leafColor = new THREE.Color().setHSL(0.3, 0.5, 0.3);
-    const trunk = new THREE.CylinderGeometry(0.17, 0.28, 2.6, 5, 1);
-    trunk.translate(0, 1.3, 0);
-    const canopy = new THREE.IcosahedronGeometry(1.4, 0);
-    canopy.scale(1, 1.1, 1);
-    canopy.translate(0, 3.2, 0);
-    const trunkCol = addVertexColors(trunk, () => barkColor.clone());
-    const canopyCol = addVertexColors(canopy, () => leafColor.clone());
-    const geo = mergeGeometries([trunkCol, canopyCol]);
-    geo.computeVertexNormals();
-    return geo;
+  makeBranchGeometry(p, low) {
+    const segments = low ? 3 : Math.max(3, 6 - p.depth);
+    const branch = new THREE.CylinderGeometry(p.radius * 0.6, p.radius, p.length, segments, 1);
+    branch.translate(0, p.length / 2, 0);
+    branch.applyQuaternion(
+      new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), p.dir)
+    );
+    branch.translate(p.origin.x, p.origin.y, p.origin.z);
+    return branch;
   }
 
-  makeBranchParts(parts, origin, direction, length, radius, depth) {
-    const segments = Math.max(3, 6 - depth);
+  makeBranchSkeleton(parts, origin, direction, length, radius, depth) {
     const dir = direction.clone().normalize();
     const end = origin.clone().addScaledVector(dir, length);
-
-    const branch = new THREE.CylinderGeometry(radius * 0.6, radius, length, segments, 1);
-    branch.translate(0, length / 2, 0);
-    branch.applyQuaternion(
-      new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir)
-    );
-    branch.translate(origin.x, origin.y, origin.z);
-    parts.push({ geo: branch, isLeaf: false });
+    parts.push({ origin, dir, length, radius, depth, isLeaf: false });
 
     if (depth >= 3) {
       const clumps = 2 + Math.floor(Math.random() * 2);
@@ -155,7 +141,7 @@ export class Forest {
         new THREE.Euler(rand(-0.6, 0.6), rand(0, Math.PI * 2), rand(-0.6, 0.6))
       );
       newDir.y = Math.max(newDir.y, 0.15);
-      this.makeBranchParts(
+      this.makeBranchSkeleton(
         parts,
         end.clone().addScaledVector(dir, -0.1),
         newDir,

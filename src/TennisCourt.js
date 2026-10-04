@@ -236,11 +236,12 @@ makeNetTexture() {
   buildColliders() {
     const halfL = COURT_LENGTH / 2 + RUNOFF_END;
     const halfW = COURT_WIDTH / 2 + RUNOFF_SIDE;
+    const postX = COURT_WIDTH / 2 + 0.914;
     const gateHalf = 1.5;
     this.colliders = [
-      { net: true, x1: -halfW - 0.5, x2: halfW + 0.5, z1: -0.15, z2: 0.15 },
-      { post: true, x1: -(halfW + 0.914) - 0.06, x2: -(halfW + 0.914) + 0.06, z1: -0.06, z2: 0.06 },
-      { post: true, x1: halfW + 0.914 - 0.06, x2: halfW + 0.914 + 0.06, z1: -0.06, z2: 0.06 },
+      { net: true, x1: -postX, x2: postX, z1: -0.15, z2: 0.15 },
+      { post: true, x1: -postX - 0.06, x2: -postX + 0.06, z1: -0.06, z2: 0.06 },
+      { post: true, x1: postX - 0.06, x2: postX + 0.06, z1: -0.06, z2: 0.06 },
       { x1: -halfW - 0.2, x2: -halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2, gate: true },
       { x1: halfW - 0.2, x2: halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2, gate: true },
       { x1: -halfW - 0.2, x2: halfW + 0.2, z1: -halfL - 0.2, z2: -halfL + 0.2 },

@@ -7,7 +7,7 @@ export class Terrain {
     const pos = geo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i), y = pos.getY(i);
-      const flat = Math.min(1, Math.max(0, (Math.hypot(x, y) - 8) / 12));      pos.setZ(i, (Math.sin(x * 0.08) * 0.6 + Math.cos(y * 0.1) * 0.5) * flat);
+      const flat = Math.min(1, Math.max(0, (Math.hypot(x, y) - 16) / 16));      pos.setZ(i, (Math.sin(x * 0.08) * 0.6 + Math.cos(y * 0.1) * 0.5) * flat);
     }
     geo.computeVertexNormals();
     const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color, roughness: 1 }));

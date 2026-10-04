@@ -4,12 +4,12 @@ import { rand } from './utils.js';
 export class TeaHouse {
   constructor(scene, options = {}) {
     this.FLOOR_Y = options.floorY ?? 0.32;
-    this.HW = options.width ?? 12;
-    this.HD = options.depth ?? 9;
-    this.WALL_H = options.wallHeight ?? 5;
+    this.HW = options.width ?? 24;
+    this.HD = options.depth ?? 18;
+    this.WALL_H = options.wallHeight ?? 10;
     this.HT = options.thickness ?? 0.24;
-    this.doorW = 4;
-    this.doorH = 4.4;
+    this.doorW = 6;
+    this.doorH = 8;
 
     this.mats = {
       post: new THREE.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 0.9 }),
@@ -107,8 +107,14 @@ export class TeaHouse {
     }
 
     const frontSegW = (HW - doorW) / 2;
+    const frontShojiBottom = 1.3;
+    const frontShojiH = 3;
     for (const sx of [-(doorW / 2 + frontSegW / 2), doorW / 2 + frontSegW / 2]) {
-      this.box(frontSegW, WALL_H, HT, this.mats.wall, sx, FLOOR_Y + WALL_H / 2, HD / 2);
+      this.box(frontSegW, frontShojiBottom, HT, this.mats.wall, sx, FLOOR_Y + frontShojiBottom / 2, HD / 2);
+      this.box(frontSegW, WALL_H - frontShojiBottom - frontShojiH, HT, this.mats.post, sx, FLOOR_Y + frontShojiBottom + frontShojiH + (WALL_H - frontShojiBottom - frontShojiH) / 2, HD / 2);
+      this.box(frontSegW - 0.5, frontShojiH, HT - 0.08, this.mats.shoji, sx, FLOOR_Y + frontShojiBottom + frontShojiH / 2, HD / 2, this.group, false);
+      this.box(0.06, frontShojiH, 0.05, this.mats.darkWood, sx, FLOOR_Y + frontShojiBottom + frontShojiH / 2, HD / 2 + 0.04, this.group, false);
+      this.box(frontSegW - 0.5, 0.06, 0.05, this.mats.darkWood, sx, FLOOR_Y + frontShojiBottom + frontShojiH / 2, HD / 2 + 0.04, this.group, false);
     }
     this.box(doorW, WALL_H - doorH, HT, this.mats.post, 0, FLOOR_Y + doorH + (WALL_H - doorH) / 2, HD / 2);
   }
@@ -194,7 +200,15 @@ export class TeaHouse {
   buildWalls() {
     const { FLOOR_Y, HW, HD, WALL_H, HT } = this;
 
-    this.box(HW, WALL_H, HT, this.mats.wall, 0, FLOOR_Y + WALL_H / 2, -HD / 2);
+    const rearBeamBottom = WALL_H - 1.0;
+    const rearShojiBottom = 1.3;
+    const rearShojiH = rearBeamBottom - rearShojiBottom;
+    this.box(HW, rearShojiBottom, HT, this.mats.wall, 0, FLOOR_Y + rearShojiBottom / 2, -HD / 2);
+    this.box(HW, WALL_H - rearBeamBottom, HT, this.mats.post, 0, FLOOR_Y + rearBeamBottom + (WALL_H - rearBeamBottom) / 2, -HD / 2);
+    for (let fx = -HW / 2 + 2; fx <= HW / 2 - 2; fx += 4) {
+      this.box(2.8, rearShojiH, HT - 0.08, this.mats.shoji, fx, FLOOR_Y + rearShojiBottom + rearShojiH / 2, -HD / 2, this.group, false);
+      this.box(2.9, rearShojiH + 0.1, 0.05, this.mats.darkWood, fx, FLOOR_Y + rearShojiBottom + rearShojiH / 2, -HD / 2, this.group, false);
+    }
 
     const beamBottom = WALL_H - 1.0;
     const shojiBottom = 1.3;
@@ -216,14 +230,14 @@ export class TeaHouse {
 
   buildRoof() {
     const { FLOOR_Y, HW, HD, WALL_H } = this;
-    const rise = 1.8, halfSpan = HD / 2 + 0.8;
+    const rise = 3.6, halfSpan = HD / 2 + 1.6;
     const slopeLen = Math.hypot(halfSpan, rise);
     const roofAngle = Math.atan2(rise, halfSpan);
     for (const side of [1, -1]) {
-      const slope = this.box(HW + 1.6, 0.16, slopeLen, this.mats.roof, 0, FLOOR_Y + WALL_H + rise / 2 - 0.1, (side * halfSpan) / 2);
+      const slope = this.box(HW + 3.2, 0.2, slopeLen, this.mats.roof, 0, FLOOR_Y + WALL_H + rise / 2 - 0.1, (side * halfSpan) / 2);
       slope.rotation.x = side * roofAngle;
     }
-    this.box(HW + 1.8, 0.22, 0.4, this.mats.roof, 0, FLOOR_Y + WALL_H + rise - 0.1, 0);
+    this.box(HW + 3.6, 0.28, 0.5, this.mats.roof, 0, FLOOR_Y + WALL_H + rise - 0.1, 0);
 
     const gableShape = new THREE.Shape();
     gableShape.moveTo(-HW / 2, 0);
@@ -244,12 +258,12 @@ export class TeaHouse {
   buildLighting() {
     const { FLOOR_Y, WALL_H } = this;
     const lantern = new THREE.Mesh(
-      new THREE.SphereGeometry(0.13, 10, 10),
+      new THREE.SphereGeometry(0.26, 12, 12),
       new THREE.MeshStandardMaterial({ color: 0xffd9a0, emissive: 0xffb870, emissiveIntensity: 1.5 })
     );
     lantern.position.set(0, FLOOR_Y + WALL_H - 0.45, -1.4);
     this.group.add(lantern);
-    const light = new THREE.PointLight(0xffc98a, 12, 20, 2);
+    const light = new THREE.PointLight(0xffc98a, 30, 34, 2);
     light.position.copy(lantern.position);
     this.group.add(light);
   }

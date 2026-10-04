@@ -5,11 +5,12 @@ import { Forest } from './src/Forest.js';
 import { GrassField } from './src/GrassField.js';
 import { Mountains, Clouds } from './src/Sky.js';
 import { TeaHouse } from './src/TeaHouse.js';
+import { TennisCourt } from './src/TennisCourt.js';
 import { MeditationUI } from './src/UI.js';
 import { Controls } from './src/Controls.js';
 import { Player } from './src/Player.js';
 
-const BUILD_TIME = '2026-10-04 09:06 UTC';
+const BUILD_TIME = '2026-10-04 09:49 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -54,13 +55,15 @@ sun.shadow.camera.far = 200;
 scene.add(sun);
 
 // ---------- World ----------
-new Terrain(scene);
+new Terrain(scene, { flatZones: [{ x: 0, z: -45, halfX: 10, halfZ: 18 }] });
 const teaHouse = new TeaHouse(scene);
-new Rocks(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) } });
+const court = new TennisCourt(scene, { x: 0, z: -45 });
+const courtExcl = { contains: (x, z) => court.footprintContains(x, z) };
+new Rocks(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) || courtExcl.contains(x, z) } });
 new Mountains(scene);
 const clouds = new Clouds(scene);
 new Forest(scene);
-new GrassField(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) } });
+new GrassField(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) || courtExcl.contains(x, z) } });
 
 // ---------- Input & UI ----------
 const meditationUI = new MeditationUI();
@@ -83,7 +86,7 @@ function animate() {
   windUniform.value += dt;
 
   clouds.update(dt);
-  player.update(dt, { teaHouse, windTime: windUniform.value });
+  player.update(dt, { teaHouse, court, windTime: windUniform.value });
   if (meditationUI.meditating) {
     meditationUI.updateBreathText(windUniform.value);
   }

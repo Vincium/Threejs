@@ -11,7 +11,7 @@ export class Player {
     this.meditating = false;
   }
 
-  update(dt, { teaHouse, windTime }) {
+  update(dt, { teaHouse, court, windTime }) {
     const cam = this.camera.position;
     const insideHouse = teaHouse.contains(cam.x, cam.z);
     const move = this.controls.getMoveVector();
@@ -28,8 +28,9 @@ export class Player {
       const step = move.normalize().multiplyScalar(this.speed * inputMagnitude * dt);
       const nx = cam.x + step.x;
       const nz = cam.z + step.z;
-      if (!teaHouse.inCollider(nx, cam.z)) cam.x = nx;
-      if (!teaHouse.inCollider(cam.x, nz)) cam.z = nz;
+      const blocked = (x, z) => teaHouse.inCollider(x, z) || (court && court.inCollider(x, z));
+      if (!blocked(nx, cam.z)) cam.x = nx;
+      if (!blocked(cam.x, nz)) cam.z = nz;
     }
     if (this.controls.keys['KeyQ']) cam.y -= this.speed * dt;
     if (this.controls.keys['KeyE']) cam.y += this.speed * dt;

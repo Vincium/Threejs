@@ -127,8 +127,12 @@ export class Controls {
     renderer.domElement.addEventListener('touchmove', (e) => {
       for (const t of e.changedTouches) {
         if (t.identifier !== lookId) continue;
-        this.yaw += (t.clientX - lastX) * 0.005;
-        this.pitch = Math.max(-1.2, Math.min(1.2, this.pitch + (t.clientY - lastY) * 0.005));
+        const dx = t.clientX - lastX;
+        const dy = t.clientY - lastY;
+        const speedScale = Math.min(1, Math.hypot(dx, dy) / 30);
+        const k = 0.005 * (0.3 + 0.7 * speedScale);
+        this.yaw += dx * k;
+        this.pitch = Math.max(-1.2, Math.min(1.2, this.pitch + dy * k));
         lastX = t.clientX;
         lastY = t.clientY;
       }

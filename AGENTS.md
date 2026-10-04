@@ -10,8 +10,7 @@ not as loose top-level functions or procedural code.
 
 ## Delivery workflow
 
-All feature work is done on a `vibe/<short-slug>` branch and merged into `main` when complete.
-Always push the finished work to `main` (after stamping the build time) so the deployed site stays current.
+Never create feature branches. Work directly on `main`: commit and push to `main` for every change (after stamping the build time) so the deployed site stays current.
 
 ## Build timestamp
 

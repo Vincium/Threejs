@@ -1,10 +1,12 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { rand, addVertexColors, createWindSwayMaterial } from './utils.js?v=20261004173659';
+import { rand, addVertexColors, createWindSwayMaterial } from './utils.js?v=20261004174038';
 
 export class Forest {
-  constructor(scene, { treeCount = 320, variantCount = 6, spread = 120, clearing = 8, excludeArea = null } = {}) {
+  constructor(scene, { treeCount = 320, variantCount = 6, spread = 120, clearing = 8, excludeArea = null, lodRadius = 60 } = {}) {
     this.scene = scene;
+    this.lodRadius = lodRadius;
+    this.variantCount = variantCount;
     this.material = createWindSwayMaterial(
       { color: 0xffffff, roughness: 0.9, vertexColors: true, flatShading: true },
       `
@@ -13,43 +15,78 @@ export class Forest {
       transformed.x += sin(uTime * 1.5 + phase) * 0.1 * heightFactor;
       transformed.z += cos(uTime * 1.2 + phase) * 0.08 * heightFactor;`
     );
+    this.nearMeshes = [];
+    this.farMeshes = [];
+    this.trees = [];
     const treesPerVariant = Math.ceil(treeCount / variantCount);
-    this.positions = [];
-    for (let v = 0; v < variantCount; v++) {
-      scene.add(this.makeInstancedVariant(treesPerVariant, spread, clearing, excludeArea));
-    }
-  }
-
-  inCollider(x, z, r = 0.35) {
-    for (const p of this.positions) {
-      if (Math.hypot(x - p.x, z - p.z) < p.r + r) return true;
-    }
-    return false;
-  }
-
-  makeInstancedVariant(count, spread, clearing, excludeArea) {
-    const mesh = new THREE.InstancedMesh(this.makeTreeGeometry(), this.material, count);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
+    const perVariant = Array.from({ length: variantCount }, () => []);
     const dummy = new THREE.Object3D();
-    let placed = 0;
     let guard = 0;
-    while (placed < count && guard < 1000) {
+    let placed = 0;
+    while (placed < treeCount && guard < 10000) {
       guard++;
       const x = rand(-spread, spread);
       const z = rand(-spread, spread);
-      if (Math.hypot(x, z) < clearing) continue;      if (excludeArea && excludeArea.contains(x, z)) continue;
+      if (Math.hypot(x, z) < clearing) continue;
+      if (excludeArea && excludeArea.contains(x, z)) continue;
+      const v = Math.floor(placed / treesPerVariant) % variantCount;
       dummy.position.set(x, 0, z);
       dummy.rotation.y = rand(0, Math.PI * 2);
       dummy.scale.setScalar(rand(0.8, 1.8));
       dummy.updateMatrix();
-      mesh.setMatrixAt(placed, dummy.matrix);
-      this.positions.push({ x, z, r: 0.3 * dummy.scale.x });
+      perVariant[v].push({ matrix: dummy.matrix.clone(), x, z, r: 0.3 * dummy.scale.x });
       placed++;
     }
-    mesh.count = placed;
-    mesh.instanceMatrix.needsUpdate = true;
-    return mesh;
+    for (let v = 0; v < variantCount; v++) {
+      const nearGeo = this.makeTreeGeometry();
+      const farGeo = this.makeLowTreeGeometry();
+      const nearMesh = new THREE.InstancedMesh(nearGeo, this.material, perVariant[v].length);
+      const farMesh = new THREE.InstancedMesh(farGeo, this.material, perVariant[v].length);
+      for (const m of [nearMesh, farMesh]) {
+        m.castShadow = true;
+        m.receiveShadow = true;
+        m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        this.scene.add(m);
+      }
+      this.nearMeshes.push(nearMesh);
+      this.farMeshes.push(farMesh);
+      for (const t of perVariant[v]) this.trees.push({ ...t, variant: v });
+    }
+    this.variantCounts = perVariant.map((a) => a.length);
+    this.lastX = null;
+    this.lastZ = null;
+    this.refresh(0, 30);
+  }
+
+  refresh(px, pz) {
+    if (this.lastX !== null && Math.hypot(px - this.lastX, pz - this.lastZ) < 5) return;
+    this.lastX = px;
+    this.lastZ = pz;
+    const r2 = this.lodRadius * this.lodRadius;
+    const nearIdx = new Array(this.variantCount).fill(0);
+    const farIdx = new Array(this.variantCount).fill(0);
+    for (const t of this.trees) {
+      const dx = t.x - px;
+      const dz = t.z - pz;
+      if (dx * dx + dz * dz < r2) {
+        this.nearMeshes[t.variant].setMatrixAt(nearIdx[t.variant]++, t.matrix);
+      } else {
+        this.farMeshes[t.variant].setMatrixAt(farIdx[t.variant]++, t.matrix);
+      }
+    }
+    for (let v = 0; v < this.variantCount; v++) {
+      this.nearMeshes[v].count = nearIdx[v];
+      this.farMeshes[v].count = farIdx[v];
+      this.nearMeshes[v].instanceMatrix.needsUpdate = true;
+      this.farMeshes[v].instanceMatrix.needsUpdate = true;
+    }
+  }
+
+  inCollider(x, z, r = 0.35) {
+    for (const p of this.trees) {
+      if (Math.hypot(x - p.x, z - p.z) < p.r + r) return true;
+    }
+    return false;
   }
 
   makeTreeGeometry() {
@@ -70,6 +107,21 @@ export class Forest {
     const treeGeo = mergeGeometries([...trunkGeos, ...leafGeos]);
     treeGeo.computeVertexNormals();
     return treeGeo;
+  }
+
+  makeLowTreeGeometry() {
+    const barkColor = new THREE.Color().setHSL(0.07, 0.35, 0.25);
+    const leafColor = new THREE.Color().setHSL(0.3, 0.5, 0.3);
+    const trunk = new THREE.CylinderGeometry(0.17, 0.28, 2.6, 5, 1);
+    trunk.translate(0, 1.3, 0);
+    const canopy = new THREE.IcosahedronGeometry(1.4, 0);
+    canopy.scale(1, 1.1, 1);
+    canopy.translate(0, 3.2, 0);
+    const trunkCol = addVertexColors(trunk, () => barkColor.clone());
+    const canopyCol = addVertexColors(canopy, () => leafColor.clone());
+    const geo = mergeGeometries([trunkCol, canopyCol]);
+    geo.computeVertexNormals();
+    return geo;
   }
 
   makeBranchParts(parts, origin, direction, length, radius, depth) {

@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 
 export const rand = (a, b) => a + Math.random() * (b - a);
-
 export const windUniform = { value: 0 };
 
 export function createWindSwayMaterial(baseProps, swayCode) {

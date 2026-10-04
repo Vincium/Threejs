@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { windUniform } from './src/utils.js?v=20261004173659';
-import { Terrain, Rocks } from './src/Terrain.js?v=20261004173659';
-import { Forest } from './src/Forest.js?v=20261004173659';
-import { GrassField } from './src/GrassField.js?v=20261004173659';
-import { Mountains, Clouds } from './src/Sky.js?v=20261004173659';
-import { TeaHouse } from './src/TeaHouse.js?v=20261004173659';
-import { TennisCourt } from './src/TennisCourt.js?v=20261004173659';
-import { MeditationUI } from './src/UI.js?v=20261004173659';
-import { Controls } from './src/Controls.js?v=20261004173659';
-import { Player } from './src/Player.js?v=20261004173659';
-import { Human } from './src/Human.js?v=20261004173659';
+import { windUniform } from './src/utils.js?v=20261004174038';
+import { Terrain, Rocks } from './src/Terrain.js?v=20261004174038';
+import { Forest } from './src/Forest.js?v=20261004174038';
+import { GrassField } from './src/GrassField.js?v=20261004174038';
+import { Mountains, Clouds } from './src/Sky.js?v=20261004174038';
+import { TeaHouse } from './src/TeaHouse.js?v=20261004174038';
+import { TennisCourt } from './src/TennisCourt.js?v=20261004174038';
+import { MeditationUI } from './src/UI.js?v=20261004174038';
+import { Controls } from './src/Controls.js?v=20261004174038';
+import { Player } from './src/Player.js?v=20261004174038';
+import { Human } from './src/Human.js?v=20261004174038';
 
-const BUILD_TIME = '2026-10-04 17:36 UTC';
+const BUILD_TIME = '2026-10-04 17:40 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -64,7 +64,7 @@ new Rocks(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains
 new Mountains(scene);
 const clouds = new Clouds(scene);
 const forest = new Forest(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) || courtExcl.contains(x, z) || Math.hypot(x, z - 30) < 3 } });
-new GrassField(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) || courtExcl.contains(x, z) }, terrain });
+const grass = new GrassField(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) || courtExcl.contains(x, z) }, terrain });
 
 // ---------- Input & UI ----------
 const meditationUI = new MeditationUI();
@@ -95,6 +95,8 @@ function animate() {
   player.update(dt, { teaHouse, court, windTime: windUniform.value });
   const moving = !player.meditating && controls.getMoveVector().lengthSq() > 0;
   human.update(dt, camera, controls, { teaHouse, court, terrain, forest, moving });
+  forest.refresh(human.pos.x, human.pos.z);
+  grass.refresh(human.pos.x, human.pos.z);
   meditationUI.setVisible(teaHouse.contains(human.pos.x, human.pos.z));
 
   // Third-person camera: lag behind the human

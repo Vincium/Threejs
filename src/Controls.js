@@ -180,7 +180,6 @@ export class Controls {
     const right = new THREE.Vector3(-forward.z, 0, forward.x);
     const v = new THREE.Vector3();
     if (this.keys['KeyW'] || this.keys['ArrowUp']) v.add(forward);
-    if (this.keys['KeyS'] || this.keys['ArrowDown']) v.sub(forward);
     if (this.keys['KeyA']) v.sub(right);
     if (this.keys['KeyD']) v.add(right);
     if (this.touchMove.active) {

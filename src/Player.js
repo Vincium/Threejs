@@ -28,11 +28,8 @@ export class Player {
     if (this.body === this.camera.position && move.lengthSq() > 0) {
       const inputMagnitude = Math.min(1, move.length()) ** 2;
       const step = move.normalize().multiplyScalar(this.speed * inputMagnitude * dt);
-      const nx = cam.x + step.x;
-      const nz = cam.z + step.z;
-      const blocked = (x, z) => teaHouse.inCollider(x, z) || (court && court.inCollider(x, z, 0.35, cam.y));
-      if (!blocked(nx, cam.z)) cam.x = nx;
-      if (!blocked(cam.x, nz)) cam.z = nz;
+      cam.x += step.x;
+      cam.z += step.z;
     }
     if (this.body === this.camera.position && this.controls.keys['KeyQ']) cam.y -= this.speed * dt;
     if (this.body === this.camera.position && this.controls.keys['KeyE']) cam.y += this.speed * dt;

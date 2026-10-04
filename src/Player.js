@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 export class Player {
-  constructor(camera, controls, { eyeHeight = 4, speed = 10, bounds = 130, forestRadius = 118 } = {}) {
+  constructor(camera, controls, { eyeHeight = 1.7, speed = 10, bounds = 130, forestRadius = 118 } = {}) {
     this.camera = camera;
     this.controls = controls;
     this.eyeHeight = eyeHeight;
@@ -36,13 +36,15 @@ export class Player {
     if (this.controls.keys['KeyE']) cam.y += this.speed * dt;
 
     const eyeTarget = this.eyeHeight;
+    const insideHouseFootprint = teaHouse.contains(cam.x, cam.z);
+    const eyeTarget = this.eyeHeight + (insideHouseFootprint ? teaHouse.FLOOR_Y : 0);
     if (Math.abs(cam.y - eyeTarget) > 0.01) {
       cam.y += (eyeTarget - cam.y) * Math.min(1, dt * 8);
     }
 
     cam.x = Math.max(-this.bounds, Math.min(this.bounds, cam.x));
     cam.z = Math.max(-this.bounds, Math.min(this.bounds, cam.z));
-    cam.y = Math.max(cam.y, 1.5);
+    cam.y = Math.max(cam.y, this.eyeHeight * 0.9);
     const groundDist = Math.hypot(cam.x, cam.z);
     if (groundDist > this.forestRadius) {
       const k = this.forestRadius / groundDist;

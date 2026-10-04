@@ -19,7 +19,7 @@ export class Terrain {
 }
 
 export class Rocks {
-  constructor(scene, { count = 25, spread = 120 } = {}) {
+  constructor(scene, { count = 25, spread = 120, excludeArea = null } = {}) {
     const geo = new THREE.DodecahedronGeometry(0.6, 0);
     const mat = new THREE.MeshStandardMaterial({ color: 0x8a8a8a, roughness: 1, flatShading: true });
     for (let i = 0; i < count; i++) {

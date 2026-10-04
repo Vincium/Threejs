@@ -4,12 +4,12 @@ import { rand } from './utils.js';
 export class TeaHouse {
   constructor(scene, options = {}) {
     this.FLOOR_Y = options.floorY ?? 0.32;
-    this.HW = options.width ?? 8;
-    this.HD = options.depth ?? 6;
-    this.WALL_H = options.wallHeight ?? 4.4;
+    this.HW = options.width ?? 12;
+    this.HD = options.depth ?? 9;
+    this.WALL_H = options.wallHeight ?? 5;
     this.HT = options.thickness ?? 0.24;
-    this.doorW = 1.9;
-    this.doorH = 4.0;
+    this.doorW = 3;
+    this.doorH = 4.4;
 
     this.mats = {
       post: new THREE.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 0.9 }),
@@ -58,7 +58,7 @@ export class TeaHouse {
     tatami.receiveShadow = true;
     this.group.add(tatami);
 
-    this.box(2.2, 0.18, 1.0, this.mats.post, 0, 0.09, HD / 2 + 0.5);
+    this.box(this.doorW, 0.18, 1.0, this.mats.post, 0, 0.09, HD / 2 + 0.5);
     this.box(HW, 0.1, 1.4, this.mats.post, 0, FLOOR_Y + 0.05, HD / 2 + 0.7);
   }
 
@@ -175,12 +175,15 @@ export class TeaHouse {
 
     this.box(HW, WALL_H, HT, this.mats.wall, 0, FLOOR_Y + WALL_H / 2, -HD / 2);
 
+    const beamBottom = WALL_H - 1.0;
+    const shojiBottom = 1.3;
+    const shojiH = beamBottom - shojiBottom;
     for (const wx of [-HW/2, HW/2]) {
       this.box(HT, 0.9, HD, this.mats.wall, wx, FLOOR_Y + 0.45, 0);
-      this.box(HT, WALL_H - 3.9, HD, this.mats.post, wx, FLOOR_Y + 3.9 + (WALL_H - 3.9) / 2, 0);
-      this.box(HT - 0.08, 2.6, HD - 0.6, this.mats.shoji, wx, FLOOR_Y + 2.6, 0, this.group, false);
+      this.box(HT, WALL_H - beamBottom, HD, this.mats.post, wx, FLOOR_Y + beamBottom + (WALL_H - beamBottom) / 2, 0);
+      this.box(HT - 0.08, shojiH, HD - 0.6, this.mats.shoji, wx, FLOOR_Y + shojiBottom + shojiH / 2, 0, this.group, false);
       for (let fz = -HD / 2 + 0.8; fz <= HD / 2 - 0.8; fz += 0.8) {
-        this.box(HT - 0.02, 2.6, 0.05, this.mats.darkWood, wx, FLOOR_Y + 2.6, fz, this.group, false);
+        this.box(HT - 0.02, shojiH, 0.05, this.mats.darkWood, wx, FLOOR_Y + shojiBottom + shojiH / 2, fz, this.group, false);
       }
     }
 
@@ -225,7 +228,7 @@ export class TeaHouse {
     );
     lantern.position.set(0, FLOOR_Y + WALL_H - 0.45, -1.4);
     this.group.add(lantern);
-    const light = new THREE.PointLight(0xffc98a, 8, 14, 2);
+    const light = new THREE.PointLight(0xffc98a, 12, 20, 2);
     light.position.copy(lantern.position);
     this.group.add(light);
   }

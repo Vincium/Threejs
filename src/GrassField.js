@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { rand, createWindSwayMaterial } from './utils.js?v=20261004172649';
+import { rand, createWindSwayMaterial } from './utils.js?v=20261004172729';
 
 export class GrassField {
-  constructor(scene, { count = 60000, spread = 90, heightScale = 0.55, excludeArea = null } = {}) {
+  constructor(scene, { count = 60000, spread = 90, heightScale = 2.2, excludeArea = null } = {}) {
     const bladeGeo = this.makeBladeGeometry(heightScale);
     const bladeMat = createWindSwayMaterial(
       { color: 0xffffff, roughness: 1, side: THREE.DoubleSide, vertexColors: true },
@@ -12,11 +12,10 @@ export class GrassField {
       transformed.x += sin(uTime * 2.0 + phase) * 0.18 * bladeH * bladeH;
       transformed.z += cos(uTime * 1.6 + phase * 1.3) * 0.1 * bladeH * bladeH;`
     );
-
     this.applyBladeGradient(bladeGeo);
-
     const grass = new THREE.InstancedMesh(bladeGeo, bladeMat, count);
     const dummy = new THREE.Object3D();
+    const tint = new THREE.Color();
     let placed = 0;
     for (let i = 0; i < count; i++) {
       const x = rand(-spread, spread);
@@ -26,35 +25,41 @@ export class GrassField {
       dummy.rotation.set(rand(-0.15, 0.15), rand(0, Math.PI), rand(-0.15, 0.15));
       dummy.scale.set(rand(0.6, 1.4), rand(0.5, 1.1), rand(0.6, 1.4));
       dummy.updateMatrix();
-      grass.setMatrixAt(placed++, dummy.matrix);
+      grass.setMatrixAt(placed, dummy.matrix);
+      tint.setHSL(0.26 + rand(-0.02, 0.02), rand(0.45, 0.65), rand(0.9, 1.1));
+      grass.setColorAt(placed, tint);
+      placed++;
     }
     grass.count = placed;
     grass.instanceMatrix.needsUpdate = true;
+    if (grass.instanceColor) grass.instanceColor.needsUpdate = true;
     scene.add(grass);
   }
 
   makeBladeGeometry(heightScale) {
-    const segs = 4;
+    const segs = 7;
     const positions = [];
     const indices = [];
-    const bottomW = 0.09;
+    const bottomW = 0.05;
+    const bendAmt = 0.35;
     for (let i = 0; i < segs; i++) {
       const t0 = i / segs;
       const t1 = (i + 1) / segs;
       const y0 = t0;
       const y1 = t1;
-      const w0 = bottomW * (1 - t0 * 0.9);
-      const w1 = bottomW * (1 - t1 * 0.9);
-      const bend1 = t1 * t1 * 0.25;
+      const w0 = bottomW * (1 - t0) ** 1.4;
+      const w1 = bottomW * (1 - t1) ** 1.4;
+      const bend0 = t0 * t0 * bendAmt;
+      const bend1 = t1 * t1 * bendAmt;
       const base = positions.length / 3;
       positions.push(
-        -w0, y0, 0,  w0, y0, 0,
+        -w0, y0, bend0,  w0, y0, bend0,
         -w1, y1, bend1, w1, y1, bend1
       );
       if (i < segs - 1) {
         indices.push(base, base + 2, base + 1, base + 1, base + 2, base + 3);
       } else {
-        positions.push(0, y1 + 0.08, bend1);
+        positions.push(0, y1 + 0.06, bend1);
         indices.push(base, positions.length / 3 - 1, base + 1, base + 1, positions.length / 3 - 1, base + 3);
       }
     }

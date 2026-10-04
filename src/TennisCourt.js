@@ -7,6 +7,7 @@ const NET_HEIGHT_CENTER = 0.914;
 const NET_HEIGHT_POST = 1.07;
 const LINE_WIDTH = 0.05;
 const FENCE_HEIGHT = 3;
+const SIDE_FENCE_HEIGHT = 1.2;
 const FENCE_OFFSET = 3.05; // run-off distance behind baseline
 
 export class TennisCourt {
@@ -127,32 +128,32 @@ export class TennisCourt {
     const halfW = COURT_WIDTH / 2 + FENCE_OFFSET;
     const gateHalf = 0.6;
     const postSpacing = 2.5;
-    const addPosts = (alongZ, fixed, from, to) => {
+    const addPosts = (alongZ, fixed, from, to, h = FENCE_HEIGHT) => {
       const n = Math.max(1, Math.ceil((to - from) / postSpacing));
       for (let i = 0; i <= n; i++) {
         const t = from + ((to - from) * i) / n;
         const px = alongZ ? fixed : t;
         const pz = alongZ ? t : fixed;
-        this.box(0.08, FENCE_HEIGHT, 0.08, this.mats.frame, px, FENCE_HEIGHT / 2, pz);
+        this.box(0.08, h, 0.08, this.mats.frame, px, h / 2, pz);
       }
     };
-    const addFence = (alongZ, fixed, from, to) => {
+    const addFence = (alongZ, fixed, from, to, h = FENCE_HEIGHT) => {
       const len = to - from;
       const fence = new THREE.Mesh(
-        new THREE.PlaneGeometry(len, FENCE_HEIGHT),
+        new THREE.PlaneGeometry(len, h),
         this.mats.fence
       );
       const mid = (from + to) / 2;
-      fence.position.set(alongZ ? fixed : mid, FENCE_HEIGHT / 2, alongZ ? mid : fixed);
+      fence.position.set(alongZ ? fixed : mid, h / 2, alongZ ? mid : fixed);
       if (alongZ) fence.rotation.y = Math.PI / 2;
       this.group.add(fence);
       this.box(alongZ ? 0.06 : len, 0.06, alongZ ? len : 0.06, this.mats.frame,
-        alongZ ? fixed : mid, FENCE_HEIGHT, alongZ ? mid : fixed, this.group, false);
+        alongZ ? fixed : mid, h, alongZ ? mid : fixed, this.group, false);
     };
     // long sides at x = ±halfW
     for (const sx of [-halfW, halfW]) {
-      addPosts(true, sx, -halfL, halfL);
-      addFence(true, sx, -halfL, halfL);
+      addPosts(true, sx, -halfL, halfL, SIDE_FENCE_HEIGHT);
+      addFence(true, sx, -halfL, halfL, SIDE_FENCE_HEIGHT);
     }
     // end at z = -halfL, full
     addPosts(false, -halfL, -halfW, halfW);

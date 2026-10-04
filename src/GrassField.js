@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { rand, createWindSwayMaterial } from './utils.js?v=20261004173145';
+import { rand, createWindSwayMaterial } from './utils.js?v=20261004173659';
 
 export class GrassField {
-  constructor(scene, { count = 240000, spread = 90, heightScale = 0.55, excludeArea = null } = {}) {
+  constructor(scene, { count = 240000, spread = 90, heightScale = 0.275, excludeArea = null, terrain = null } = {}) {
     const bladeGeo = this.makeBladeGeometry(heightScale);
     const bladeMat = createWindSwayMaterial(
       { color: 0xffffff, roughness: 1, side: THREE.DoubleSide, vertexColors: true },
@@ -21,7 +21,7 @@ export class GrassField {
       const x = rand(-spread, spread);
       const z = rand(-spread, spread);
       if (excludeArea && excludeArea.contains(x, z)) continue;
-      dummy.position.set(x, 0, z);
+      dummy.position.set(x, terrain ? terrain.getHeight(x, z) : 0, z);
       dummy.rotation.set(rand(-0.15, 0.15), rand(0, Math.PI), rand(-0.15, 0.15));
       dummy.scale.set(rand(0.6, 1.4), rand(0.5, 1.1), rand(0.6, 1.4));
       dummy.updateMatrix();

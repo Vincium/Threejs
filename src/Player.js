@@ -37,9 +37,9 @@ export class Player {
 
     const eyeTarget = this.eyeHeight;
     const insideHouseFootprint = teaHouse.contains(cam.x, cam.z);
-    const eyeTarget = this.eyeHeight + (insideHouseFootprint ? teaHouse.FLOOR_Y : 0);
-    if (Math.abs(cam.y - eyeTarget) > 0.01) {
-      cam.y += (eyeTarget - cam.y) * Math.min(1, dt * 8);
+    const standEyeTarget = this.eyeHeight + (insideHouseFootprint ? teaHouse.FLOOR_Y : 0);
+    if (Math.abs(cam.y - standEyeTarget) > 0.01) {
+      cam.y += (standEyeTarget - cam.y) * Math.min(1, dt * 8);
     }
 
     cam.x = Math.max(-this.bounds, Math.min(this.bounds, cam.x));

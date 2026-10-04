@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { windUniform } from './src/utils.js?v=20261004171833';
-import { Terrain, Rocks } from './src/Terrain.js?v=20261004171833';
-import { Forest } from './src/Forest.js?v=20261004171833';
-import { GrassField } from './src/GrassField.js?v=20261004171833';
-import { Mountains, Clouds } from './src/Sky.js?v=20261004171833';
-import { TeaHouse } from './src/TeaHouse.js?v=20261004171833';
-import { TennisCourt } from './src/TennisCourt.js?v=20261004171833';
-import { MeditationUI } from './src/UI.js?v=20261004171833';
-import { Controls } from './src/Controls.js?v=20261004171833';
-import { Player } from './src/Player.js?v=20261004171833';
-import { Human } from './src/Human.js?v=20261004171833';
+import { windUniform } from './src/utils.js?v=20261004172649';
+import { Terrain, Rocks } from './src/Terrain.js?v=20261004172649';
+import { Forest } from './src/Forest.js?v=20261004172649';
+import { GrassField } from './src/GrassField.js?v=20261004172649';
+import { Mountains, Clouds } from './src/Sky.js?v=20261004172649';
+import { TeaHouse } from './src/TeaHouse.js?v=20261004172649';
+import { TennisCourt } from './src/TennisCourt.js?v=20261004172649';
+import { MeditationUI } from './src/UI.js?v=20261004172649';
+import { Controls } from './src/Controls.js?v=20261004172649';
+import { Player } from './src/Player.js?v=20261004172649';
+import { Human } from './src/Human.js?v=20261004172649';
 
-const BUILD_TIME = '2026-10-04 17:18 UTC';
+const BUILD_TIME = '2026-10-04 17:26 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -63,7 +63,7 @@ const courtExcl = { contains: (x, z) => court.footprintContains(x, z) };
 new Rocks(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) || courtExcl.contains(x, z) } });
 new Mountains(scene);
 const clouds = new Clouds(scene);
-new Forest(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) || courtExcl.contains(x, z) } });
+const forest = new Forest(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) || courtExcl.contains(x, z) || Math.hypot(x, z - 30) < 3 } });
 new GrassField(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) || courtExcl.contains(x, z) } });
 
 // ---------- Input & UI ----------
@@ -94,7 +94,7 @@ function animate() {
   controls.update(dt);
   player.update(dt, { teaHouse, court, windTime: windUniform.value });
   const moving = !player.meditating && controls.getMoveVector().lengthSq() > 0;
-  human.update(dt, camera, controls, { teaHouse, court, terrain, moving });
+  human.update(dt, camera, controls, { teaHouse, court, terrain, forest, moving });
   meditationUI.setVisible(teaHouse.contains(human.pos.x, human.pos.z));
 
   // Third-person camera: lag behind the human

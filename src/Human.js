@@ -114,7 +114,7 @@ export class Human {
     return g;
   }
 
-  update(dt, camera, controls, { teaHouse, court, terrain, moving }) {
+  update(dt, camera, controls, { teaHouse, court, terrain, forest, moving }) {
     const ease = (v, t) => v + (t - v) * Math.min(1, dt * 10);
 
     // Face the movement direction, then walk forward
@@ -137,7 +137,8 @@ export class Human {
       const nz = this.pos.z + forward.z * 4.5 * dt;
       const blocked = (x, z) =>
         (teaHouse && teaHouse.inCollider(x, z)) ||
-        (court && court.inCollider(x, z, 0.35, this.pos.y));
+        (court && court.inCollider(x, z, 0.35, this.pos.y)) ||
+        (forest && forest.inCollider(x, z, 0.35));
       if (!blocked(nx, this.pos.z)) this.pos.x = nx;
       if (!blocked(this.pos.x, nz)) this.pos.z = nz;
     }

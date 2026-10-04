@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { rand, addVertexColors, createWindSwayMaterial } from './utils.js?v=20261004171833';
+import { rand, addVertexColors, createWindSwayMaterial } from './utils.js?v=20261004172649';
 
 export class Forest {
   constructor(scene, { treeCount = 320, variantCount = 6, spread = 120, clearing = 8, excludeArea = null } = {}) {
@@ -14,9 +14,17 @@ export class Forest {
       transformed.z += cos(uTime * 1.2 + phase) * 0.08 * heightFactor;`
     );
     const treesPerVariant = Math.ceil(treeCount / variantCount);
+    this.positions = [];
     for (let v = 0; v < variantCount; v++) {
       scene.add(this.makeInstancedVariant(treesPerVariant, spread, clearing, excludeArea));
     }
+  }
+
+  inCollider(x, z, r = 0.35) {
+    for (const p of this.positions) {
+      if (Math.hypot(x - p.x, z - p.z) < p.r + r) return true;
+    }
+    return false;
   }
 
   makeInstancedVariant(count, spread, clearing, excludeArea) {
@@ -36,6 +44,7 @@ export class Forest {
       dummy.scale.setScalar(rand(0.8, 1.8));
       dummy.updateMatrix();
       mesh.setMatrixAt(placed, dummy.matrix);
+      this.positions.push({ x, z, r: 0.3 * dummy.scale.x });
       placed++;
     }
     mesh.count = placed;

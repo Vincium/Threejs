@@ -133,8 +133,8 @@ export class Human {
     const movingForward = moving && this.walkAmount > 0.5;
     const forward = new THREE.Vector3(Math.sin(this.facing), 0, Math.cos(this.facing));
     if (movingForward) {
-      const nx = this.pos.x + forward.x * 9 * dt;
-      const nz = this.pos.z + forward.z * 9 * dt;
+      const nx = this.pos.x + forward.x * 4.5 * dt;
+      const nz = this.pos.z + forward.z * 4.5 * dt;
       const blocked = (x, z) =>
         (teaHouse && teaHouse.inCollider(x, z)) ||
         (court && court.inCollider(x, z, 0.35, this.pos.y));
@@ -146,11 +146,11 @@ export class Human {
     this.groundY = teaHouse.contains(this.pos.x, this.pos.z) ? Math.max(teaHouse.FLOOR_Y, floorY) : floorY;
     this.pos.y = this.groundY;
     this.group.position.set(this.pos.x, this.groundY, this.pos.z);
-    this.group.rotation.y = this.facing;
+    this.group.rotation.y = this.facing + Math.PI;
 
     this.head.rotation.x = THREE.MathUtils.clamp(controls.pitch, -0.6, 0.6) * (1 - (this.sitAmount || 0));
 
-    this.walkPhase += dt * (moving ? 8 : 0);
+    this.walkPhase += dt * (moving ? 6 : 0);
     this.walkAmount = ease(this.walkAmount || 0, moving ? 1 : 0);
 
     const a = Math.sin(this.walkPhase) * this.walkAmount;

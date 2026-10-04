@@ -58,12 +58,6 @@ export class Controls {
     };
     const clampToHalf = (dx, dy) => {
       if (dy > 0) dy = 0;
-      const len = Math.hypot(dx, dy);
-      if (len > 0) {
-        const scale = Math.min(1, len);
-        dx = (dx / len) * scale;
-        dy = (dy / len) * scale;
-      }
       return [dx, dy];
     };
 

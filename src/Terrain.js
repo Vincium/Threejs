@@ -7,7 +7,7 @@ export class Terrain {
     const pos = geo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i), y = pos.getY(i);
-      pos.setZ(i, Math.sin(x * 0.08) * 0.6 + Math.cos(y * 0.1) * 0.5);
+      const flat = Math.min(1, Math.max(0, (Math.hypot(x, y) - 8) / 12));      pos.setZ(i, (Math.sin(x * 0.08) * 0.6 + Math.cos(y * 0.1) * 0.5) * flat);
     }
     geo.computeVertexNormals();
     const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color, roughness: 1 }));
@@ -29,7 +29,7 @@ export class Rocks {
         0.2,
         (Math.random() - 0.5) * 2 * spread
       );
-      rock.scale.set(
+      if (excludeArea && excludeArea.contains(rock.position.x, rock.position.z)) continue;      rock.scale.set(
         0.4 + Math.random() * 1.1,
         0.3 + Math.random() * 0.7,
         0.4 + Math.random() * 1.1

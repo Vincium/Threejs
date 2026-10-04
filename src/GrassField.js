@@ -17,6 +17,7 @@ export class GrassField {
 
     const grass = new THREE.InstancedMesh(bladeGeo, bladeMat, count);
     const dummy = new THREE.Object3D();
+    let placed = 0;
     for (let i = 0; i < count; i++) {
       const x = rand(-spread, spread);
       const z = rand(-spread, spread);
@@ -25,8 +26,9 @@ export class GrassField {
       dummy.rotation.set(rand(-0.15, 0.15), rand(0, Math.PI), rand(-0.15, 0.15));
       dummy.scale.set(rand(0.6, 1.4), rand(0.5, 1.1), rand(0.6, 1.4));
       dummy.updateMatrix();
-      grass.setMatrixAt(i, dummy.matrix);
+      grass.setMatrixAt(placed++, dummy.matrix);
     }
+    grass.count = placed;
     grass.instanceMatrix.needsUpdate = true;
     scene.add(grass);
   }

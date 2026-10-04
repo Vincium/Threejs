@@ -9,7 +9,7 @@ import { MeditationUI } from './src/UI.js';
 import { Controls } from './src/Controls.js';
 import { Player } from './src/Player.js';
 
-const BUILD_TIME = '2026-10-04 07:25 UTC';
+const BUILD_TIME = '2026-10-04 08:00 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -55,10 +55,10 @@ scene.add(sun);
 
 // ---------- World ----------
 new Terrain(scene);
-new Rocks(scene);
+const teaHouse = new TeaHouse(scene);
+new Rocks(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) } });
 new Mountains(scene);
 const clouds = new Clouds(scene);
-const teaHouse = new TeaHouse(scene);
 new Forest(scene);
 new GrassField(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) } });
 

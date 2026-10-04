@@ -24,7 +24,7 @@ export class Player {
     }
 
     if (move.lengthSq() > 0) {
-      const inputMagnitude = Math.min(1, move.length());
+      const inputMagnitude = Math.min(1, move.length()) ** 2;
       const step = move.normalize().multiplyScalar(this.speed * inputMagnitude * dt);
       const nx = cam.x + step.x;
       const nz = cam.z + step.z;

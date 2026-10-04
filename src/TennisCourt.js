@@ -21,7 +21,7 @@ export class TennisCourt {
     this.COURT_WIDTH = COURT_WIDTH;
     this.FENCE_OFFSET = FENCE_OFFSET;
     this.mats = {
-      clay: new THREE.MeshStandardMaterial({ color: 0xb5651d, roughness: 1 }),
+      clay: new THREE.MeshStandardMaterial({ color: 0xd0592a, roughness: 1 }),
       line: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
       net: new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 1, side: THREE.DoubleSide }),
       band: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
@@ -52,19 +52,14 @@ export class TennisCourt {
   buildSurface() {
     const totalL = COURT_LENGTH + FENCE_OFFSET * 2;
     const totalW = COURT_WIDTH + FENCE_OFFSET * 2;
-    const clay = new THREE.Mesh(
-      new THREE.PlaneGeometry(totalW, totalL),
-      this.mats.clay
-    );
-    clay.rotation.x = -Math.PI / 2;
-    clay.receiveShadow = true;
-    this.group.add(clay);
-    const apron = this.box(totalW + 0.6, 0.1, totalL + 0.6, this.mats.frame, 0, 0.05, 0);
+    const slab = this.box(totalW, 0.1, totalL, this.mats.clay, 0, 0.05, 0);
+    slab.receiveShadow = true;
+    const apron = this.box(totalW + 0.6, 0.08, totalL + 0.6, this.mats.frame, 0, 0.04, 0);
     apron.receiveShadow = true;
   }
 
   buildLines() {
-    const lineY = 0.012;
+    const lineY = 0.106;
     const halfL = COURT_LENGTH / 2;
     const halfW = COURT_WIDTH / 2;
     const add = (w, d, x, z) => {
@@ -107,6 +102,7 @@ export class TennisCourt {
     }
     netGeo.computeVertexNormals();
     const net = new THREE.Mesh(netGeo, this.mats.net);
+    net.position.y = 0.1;
     net.rotation.y = Math.PI / 2;
     this.group.add(net);
     const bandGeo = new THREE.PlaneGeometry(postX * 2, 0.07, segs, 1);
@@ -118,10 +114,11 @@ export class TennisCourt {
     }
     bandGeo.computeVertexNormals();
     const band = new THREE.Mesh(bandGeo, this.mats.band);
+    band.position.y = 0.1;
     band.rotation.y = Math.PI / 2;
     this.group.add(band);
     for (const px of [-postX, postX]) {
-      this.box(0.12, NET_HEIGHT_POST, 0.12, this.mats.post, px, NET_HEIGHT_POST / 2, 0);
+      this.box(0.12, NET_HEIGHT_POST, 0.12, this.mats.post, px, 0.1 + NET_HEIGHT_POST / 2, 0);
     }
   }
 
@@ -136,7 +133,7 @@ export class TennisCourt {
         const t = from + ((to - from) * i) / n;
         const px = alongZ ? fixed : t;
         const pz = alongZ ? t : fixed;
-        this.box(0.08, h, 0.08, this.mats.frame, px, h / 2, pz);
+        this.box(0.08, h, 0.08, this.mats.frame, px, h / 2, pz, this.group, false);
       }
     };
     const addFence = (alongZ, fixed, from, to, h = FENCE_HEIGHT) => {
@@ -145,6 +142,7 @@ export class TennisCourt {
         new THREE.PlaneGeometry(len, h),
         this.mats.fence
       );
+      fence.castShadow = false;
       const mid = (from + to) / 2;
       fence.position.set(alongZ ? fixed : mid, h / 2, alongZ ? mid : fixed);
       if (alongZ) fence.rotation.y = Math.PI / 2;
@@ -166,7 +164,7 @@ export class TennisCourt {
     addFence(false, halfL, gateHalf, halfW);
     // gate door, slightly ajar
     const gate = this.box(0.05, FENCE_HEIGHT * 0.95, gateHalf * 2, this.mats.gate,
-      gateHalf, FENCE_HEIGHT * 0.475, halfL);
+      gateHalf, FENCE_HEIGHT * 0.475, halfL, this.group, false);
     gate.rotation.y = 0.5;
   }
 

@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { rand, createWindSwayMaterial } from './utils.js?v=20261004172729';
+import { rand, createWindSwayMaterial } from './utils.js?v=20261004172853';
 
 export class GrassField {
-  constructor(scene, { count = 60000, spread = 90, heightScale = 2.2, excludeArea = null } = {}) {
+  constructor(scene, { count = 240000, spread = 90, heightScale = 0.55, excludeArea = null } = {}) {
     const bladeGeo = this.makeBladeGeometry(heightScale);
     const bladeMat = createWindSwayMaterial(
       { color: 0xffffff, roughness: 1, side: THREE.DoubleSide, vertexColors: true },

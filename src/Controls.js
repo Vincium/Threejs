@@ -111,7 +111,6 @@ export class Controls {
     addEventListener('pointerup', () => (dragging = false));
     addEventListener('pointermove', (e) => {
       if (!dragging) return;
-      this.yaw += (e.clientX - lastX) * 0.004;
       this.pitch = Math.max(-1.2, Math.min(1.2, this.pitch - (e.clientY - lastY) * 0.004));
       lastX = e.clientX;
       lastY = e.clientY;
@@ -138,7 +137,6 @@ export class Controls {
         const dy = t.clientY - lastY;
         const speedScale = Math.min(1, Math.hypot(dx, dy) / 30);
         const k = 0.005 * (0.3 + 0.7 * speedScale);
-        this.yaw += dx * k;
         this.pitch = Math.max(-1.2, Math.min(1.2, this.pitch - dy * k));
         lastX = t.clientX;
         lastY = t.clientY;

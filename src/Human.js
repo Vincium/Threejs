@@ -114,7 +114,7 @@ export class Human {
     return g;
   }
 
-  update(dt, camera, controls, { teaHouse, court, moving }) {
+  update(dt, camera, controls, { teaHouse, court, terrain, moving }) {
     const ease = (v, t) => v + (t - v) * Math.min(1, dt * 10);
 
     // Face the movement direction, then walk forward
@@ -142,8 +142,10 @@ export class Human {
       if (!blocked(this.pos.x, nz)) this.pos.z = nz;
     }
 
-    const floorY = teaHouse.contains(this.pos.x, this.pos.z) ? teaHouse.FLOOR_Y : 0;
-    this.group.position.set(this.pos.x, floorY, this.pos.z);
+    const floorY = (terrain ? terrain.getHeight(this.pos.x, this.pos.z) : 0);
+    this.groundY = teaHouse.contains(this.pos.x, this.pos.z) ? Math.max(teaHouse.FLOOR_Y, floorY) : floorY;
+    this.pos.y = this.groundY;
+    this.group.position.set(this.pos.x, this.groundY, this.pos.z);
     this.group.rotation.y = this.facing;
 
     this.head.rotation.x = THREE.MathUtils.clamp(controls.pitch, -0.6, 0.6) * (1 - (this.sitAmount || 0));

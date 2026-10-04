@@ -3,6 +3,7 @@ import * as THREE from 'three';
 export class Terrain {
   constructor(scene, { size = 300, segments = 64, color = 0x3f7a2f, flatZones = [] } = {}) {
     this.scene = scene;
+    this.flatZones = flatZones;
     const geo = new THREE.PlaneGeometry(size, size, segments, segments);
     const pos = geo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
@@ -17,6 +18,15 @@ export class Terrain {
     mesh.receiveShadow = true;
     scene.add(mesh);
     this.mesh = mesh;
+  }
+
+  getHeight(x, z) {
+    let flat = Math.min(1, Math.max(0, (Math.hypot(x, z) - 16) / 16));
+    for (const zone of this.flatZones) {
+      const zf = Math.min(1, Math.max(0, (Math.max(Math.abs(x - zone.x) - zone.halfX, Math.abs(z - zone.z) - zone.halfZ)) / 6));
+      flat = Math.min(flat, zf);
+    }
+    return (Math.sin(x * 0.08) * 0.6 + Math.cos(-z * 0.1) * 0.5) * flat;
   }
 }
 

@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { windUniform } from './src/utils.js?v=20261004154346';
-import { Terrain, Rocks } from './src/Terrain.js?v=20261004154346';
-import { Forest } from './src/Forest.js?v=20261004154346';
-import { GrassField } from './src/GrassField.js?v=20261004154346';
-import { Mountains, Clouds } from './src/Sky.js?v=20261004154346';
-import { TeaHouse } from './src/TeaHouse.js?v=20261004154346';
-import { TennisCourt } from './src/TennisCourt.js?v=20261004154346';
-import { MeditationUI } from './src/UI.js?v=20261004154346';
-import { Controls } from './src/Controls.js?v=20261004154346';
-import { Player } from './src/Player.js?v=20261004154346';
-import { Human } from './src/Human.js?v=20261004154346';
+import { windUniform } from './src/utils.js?v=20261004154731';
+import { Terrain, Rocks } from './src/Terrain.js?v=20261004154731';
+import { Forest } from './src/Forest.js?v=20261004154731';
+import { GrassField } from './src/GrassField.js?v=20261004154731';
+import { Mountains, Clouds } from './src/Sky.js?v=20261004154731';
+import { TeaHouse } from './src/TeaHouse.js?v=20261004154731';
+import { TennisCourt } from './src/TennisCourt.js?v=20261004154731';
+import { MeditationUI } from './src/UI.js?v=20261004154731';
+import { Controls } from './src/Controls.js?v=20261004154731';
+import { Player } from './src/Player.js?v=20261004154731';
+import { Human } from './src/Human.js?v=20261004154731';
 
-const BUILD_TIME = '2026-10-04 15:43 UTC';
+const BUILD_TIME = '2026-10-04 15:47 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -56,7 +56,7 @@ sun.shadow.camera.far = 200;
 scene.add(sun);
 
 // ---------- World ----------
-new Terrain(scene, { flatZones: [{ x: 0, z: -45, halfX: 10, halfZ: 22 }] });
+const terrain = new Terrain(scene, { flatZones: [{ x: 0, z: -45, halfX: 10, halfZ: 22 }] });
 const teaHouse = new TeaHouse(scene);
 const court = new TennisCourt(scene, { x: 0, z: -45 });
 const courtExcl = { contains: (x, z) => court.footprintContains(x, z) };
@@ -94,13 +94,16 @@ function animate() {
   controls.update(dt);
   player.update(dt, { teaHouse, court, windTime: windUniform.value });
   const moving = !player.meditating && controls.getMoveVector().lengthSq() > 0;
-  human.update(dt, camera, controls, { teaHouse, court, moving });
+  human.update(dt, camera, controls, { teaHouse, court, terrain, moving });
   meditationUI.setVisible(teaHouse.contains(human.pos.x, human.pos.z));
 
   // Third-person camera: lag behind the human
   {
     const flat = new THREE.Vector3(Math.sin(human.facing), 0, Math.cos(human.facing));
-    const camTargetPos = human.pos.clone().addScaledVector(flat, -humanCamDist).add(new THREE.Vector3(0, 2.2, 0));
+    const camX = human.pos.x - flat.x * humanCamDist;
+    const camZ = human.pos.z - flat.z * humanCamDist;
+    const camGroundY = terrain.getHeight(camX, camZ) + 2.2;
+    const camTargetPos = new THREE.Vector3(camX, Math.max(camGroundY, human.pos.y + 1.6), camZ);
     camera.position.lerp(camTargetPos, Math.min(1, dt * 2.5));
     const lookTarget = human.pos.clone().add(new THREE.Vector3(0, 1.4, 0));
     const smoothLook = camera.userData.smoothLook || (camera.userData.smoothLook = lookTarget.clone());

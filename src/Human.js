@@ -161,16 +161,16 @@ export class Human {
 
     this.legL.pivot.rotation.x = a * 0.7 * standBlend + sitAmount * 1.35;
     this.legR.pivot.rotation.x = b * 0.7 * standBlend + sitAmount * 1.35;
-    this.legL.knee.rotation.x = Math.max(0, -a) * 0.9 * standBlend + sitAmount * 1.45;
-    this.legR.knee.rotation.x = Math.max(0, -b) * 0.9 * standBlend + sitAmount * 1.45;
+    this.legL.knee.rotation.x = -(Math.max(0, -a) * 0.9 * standBlend + sitAmount * 1.45);
+    this.legR.knee.rotation.x = -(Math.max(0, -b) * 0.9 * standBlend + sitAmount * 1.45);
     this.legL.pivot.rotation.z = sitAmount * 0.5;
     this.legR.pivot.rotation.z = -sitAmount * 0.5;
     this.armL.pivot.rotation.x = b * 0.6 * standBlend - sitAmount * 0.75;
     this.armR.pivot.rotation.x = a * 0.6 * standBlend - sitAmount * 0.75;
     this.armL.pivot.rotation.z = sitAmount * 0.12;
     this.armR.pivot.rotation.z = -sitAmount * 0.12;
-    this.armL.elbow.rotation.x = -0.25 - Math.max(0, b) * 0.5 * standBlend - sitAmount * 0.9;
-    this.armR.elbow.rotation.x = -0.25 - Math.max(0, a) * 0.5 * standBlend - sitAmount * 0.9;
+    this.armL.elbow.rotation.x = 0.25 + Math.max(0, b) * 0.5 * standBlend + sitAmount * 0.9;
+    this.armR.elbow.rotation.x = 0.25 + Math.max(0, a) * 0.5 * standBlend + sitAmount * 0.9;
 
     this.group.position.y += Math.abs(Math.sin(this.walkPhase)) * 0.04 * this.walkAmount - sitAmount * 0.42;
   }

@@ -27,7 +27,13 @@ export class TennisCourt {
       net: new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 1, side: THREE.DoubleSide }),
       band: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
       post: new THREE.MeshStandardMaterial({ color: 0x2b2b2b, roughness: 0.6, metalness: 0.3 }),
-      fence: new THREE.MeshStandardMaterial({ color: 0x3a3f44, roughness: 0.7, metalness: 0.2, transparent: true, opacity: 0.45, side: THREE.DoubleSide }),
+      fence: new THREE.MeshStandardMaterial({
+        color: 0x9aa3ab, roughness: 0.45, metalness: 0.8, side: THREE.DoubleSide,
+        map: null,
+        alphaMap: this.makeChainLinkTexture(),
+        transparent: true,
+        alphaTest: 0.4,
+      }),
       frame: new THREE.MeshStandardMaterial({ color: 0x2b2b2b, roughness: 0.6, metalness: 0.3 }),
       gate: new THREE.MeshStandardMaterial({ color: 0x1e5c2e, roughness: 0.7 }),
     };
@@ -48,6 +54,30 @@ export class TennisCourt {
     }
     parent.add(m);
     return m;
+  }
+
+makeChainLinkTexture() {
+    const c = document.createElement('canvas');
+    const cell = 16;
+    c.width = c.height = cell * 8;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2.2;
+    for (let i = -c.height; i < c.width + c.height; i += cell) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i + c.height, c.height);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(i + c.height, 0);
+      ctx.lineTo(i, c.height);
+      ctx.stroke();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.colorSpace = THREE.NoColorSpace;
+    return tex;
   }
 
   buildSurface() {
@@ -144,6 +174,12 @@ export class TennisCourt {
         this.mats.fence
       );
       fence.castShadow = false;
+      const mat = fence.material.clone();
+      mat.alphaMap = mat.alphaMap.clone();
+      mat.alphaMap.needsUpdate = true;
+      mat.alphaMap.wrapS = mat.alphaMap.wrapT = THREE.RepeatWrapping;
+      mat.alphaMap.repeat.set(len / 0.35, h / 0.35);
+      fence.material = mat;
       const mid = (from + to) / 2;
       fence.position.set(alongZ ? fixed : mid, h / 2, alongZ ? mid : fixed);
       if (alongZ) fence.rotation.y = Math.PI / 2;

@@ -7,7 +7,9 @@ export class Terrain {
     const pos = geo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i), y = pos.getY(i);
-      let flat = Math.min(1, Math.max(0, (Math.hypot(x, y) - 16) / 16));      for (const zone of flatZones) {        const zf = Math.min(1, Math.max(0, (Math.max(Math.abs(x - zone.x) - zone.halfX, Math.abs(y - zone.z) - zone.halfZ)) / 6));        flat = Math.min(flat, zf);      }      pos.setZ(i, (Math.sin(x * 0.08) * 0.6 + Math.cos(y * 0.1) * 0.5) * flat);
+      let flat = Math.min(1, Math.max(0, (Math.hypot(x, y) - 16) / 16));      for (const zone of flatZones) {        const wz = -y;
+        const zf = Math.min(1, Math.max(0, (Math.max(Math.abs(x - zone.x) - zone.halfX, Math.abs(wz - zone.z) - zone.halfZ)) / 6));
+        flat = Math.min(flat, zf);      }      pos.setZ(i, (Math.sin(x * 0.08) * 0.6 + Math.cos(y * 0.1) * 0.5) * flat);
     }
     geo.computeVertexNormals();
     const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color, roughness: 1 }));

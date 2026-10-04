@@ -134,7 +134,6 @@ makeChainLinkTexture() {
     netGeo.computeVertexNormals();
     const net = new THREE.Mesh(netGeo, this.mats.net);
     net.position.y = 0.1;
-    net.rotation.y = Math.PI / 2;
     this.group.add(net);
     const bandGeo = new THREE.PlaneGeometry(postX * 2, 0.07, segs, 1);
     const bpos = bandGeo.attributes.position;
@@ -146,7 +145,6 @@ makeChainLinkTexture() {
     bandGeo.computeVertexNormals();
     const band = new THREE.Mesh(bandGeo, this.mats.band);
     band.position.y = 0.1;
-    band.rotation.y = Math.PI / 2;
     this.group.add(band);
     for (const px of [-postX, postX]) {
       this.box(0.12, NET_HEIGHT_POST, 0.12, this.mats.post, px, 0.1 + NET_HEIGHT_POST / 2, 0);

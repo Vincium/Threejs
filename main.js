@@ -10,7 +10,7 @@ import { MeditationUI } from './src/UI.js';
 import { Controls } from './src/Controls.js';
 import { Player } from './src/Player.js';
 
-const BUILD_TIME = '2026-10-04 10:46 UTC';
+const BUILD_TIME = '2026-10-04 10:52 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -55,7 +55,7 @@ sun.shadow.camera.far = 200;
 scene.add(sun);
 
 // ---------- World ----------
-new Terrain(scene, { flatZones: [{ x: 0, z: -45, halfX: 10, halfZ: 18 }] });
+new Terrain(scene, { flatZones: [{ x: 0, z: -45, halfX: 10, halfZ: 22 }] });
 const teaHouse = new TeaHouse(scene);
 const court = new TennisCourt(scene, { x: 0, z: -45 });
 const courtExcl = { contains: (x, z) => court.footprintContains(x, z) };

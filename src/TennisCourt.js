@@ -8,7 +8,8 @@ const NET_HEIGHT_POST = 1.07;
 const LINE_WIDTH = 0.05;
 const FENCE_HEIGHT = 3;
 const SIDE_FENCE_HEIGHT = 1.2;
-const FENCE_OFFSET = 3.05; // run-off distance behind baseline
+const RUNOFF_END = 6.4; // ITF run-off behind baselines
+const RUNOFF_SIDE = 3.66; // ITF run-off beyond sidelines
 
 export class TennisCourt {
   constructor(scene, { x = 0, z = 0, rotationY = 0 } = {}) {
@@ -19,7 +20,7 @@ export class TennisCourt {
     this.originZ = z;
     this.COURT_LENGTH = COURT_LENGTH;
     this.COURT_WIDTH = COURT_WIDTH;
-    this.FENCE_OFFSET = FENCE_OFFSET;
+    
     this.mats = {
       clay: new THREE.MeshStandardMaterial({ color: 0xd0592a, roughness: 1 }),
       line: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
@@ -50,8 +51,8 @@ export class TennisCourt {
   }
 
   buildSurface() {
-    const totalL = COURT_LENGTH + FENCE_OFFSET * 2;
-    const totalW = COURT_WIDTH + FENCE_OFFSET * 2;
+    const totalL = COURT_LENGTH + RUNOFF_END * 2;
+    const totalW = COURT_WIDTH + RUNOFF_SIDE * 2;
     const slab = this.box(totalW, 0.1, totalL, this.mats.clay, 0, 0.05, 0);
     slab.receiveShadow = true;
     const apron = this.box(totalW + 0.6, 0.08, totalL + 0.6, this.mats.frame, 0, 0.04, 0);
@@ -84,9 +85,9 @@ export class TennisCourt {
     add(singlesHalfW * 2 + LINE_WIDTH, LINE_WIDTH, 0, serviceZ);
     // center service line
     add(LINE_WIDTH, serviceZ * 2, 0, 0);
-    // center marks on baselines
-    add(LINE_WIDTH, 0.3, 0, -halfL);
-    add(LINE_WIDTH, 0.3, 0, halfL);
+    // center marks on baselines (10cm, inside the court)
+    add(LINE_WIDTH, 0.1, 0, -halfL + 0.05);
+    add(LINE_WIDTH, 0.1, 0, halfL - 0.05);
   }
 
   buildNet() {
@@ -123,8 +124,8 @@ export class TennisCourt {
   }
 
   buildFence() {
-    const halfL = COURT_LENGTH / 2 + FENCE_OFFSET;
-    const halfW = COURT_WIDTH / 2 + FENCE_OFFSET;
+    const halfL = COURT_LENGTH / 2 + RUNOFF_END;
+    const halfW = COURT_WIDTH / 2 + RUNOFF_SIDE;
     const gateHalf = 0.6;
     const postSpacing = 2.5;
     const addPosts = (alongZ, fixed, from, to, h = FENCE_HEIGHT) => {
@@ -169,8 +170,8 @@ export class TennisCourt {
   }
 
   buildColliders() {
-    const halfL = COURT_LENGTH / 2 + FENCE_OFFSET;
-    const halfW = COURT_WIDTH / 2 + FENCE_OFFSET;
+    const halfL = COURT_LENGTH / 2 + RUNOFF_END;
+    const halfW = COURT_WIDTH / 2 + RUNOFF_SIDE;
     const gateHalf = 0.6;
     this.colliders = [
       { x1: -halfW - 0.2, x2: -halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2 },
@@ -192,8 +193,8 @@ export class TennisCourt {
   }
 
   contains(wx, wz, margin = 1) {
-    const halfL = COURT_LENGTH / 2 + FENCE_OFFSET;
-    const halfW = COURT_WIDTH / 2 + FENCE_OFFSET;
+    const halfL = COURT_LENGTH / 2 + RUNOFF_END;
+    const halfW = COURT_WIDTH / 2 + RUNOFF_SIDE;
     return Math.abs(wx - this.originX) < halfW + margin && Math.abs(wz - this.originZ) < halfL + margin;
   }
 

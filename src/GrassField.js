@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { rand, createWindSwayMaterial } from './utils.js?v=20261004154731';
+import { rand, createWindSwayMaterial } from './utils.js?v=20261004154938';
 
 export class GrassField {
   constructor(scene, { count = 60000, spread = 90, heightScale = 0.55, excludeArea = null } = {}) {

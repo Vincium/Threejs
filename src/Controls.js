@@ -29,8 +29,10 @@ export class Controls {
       position: 'fixed',
       left: 'max(24px, env(safe-area-inset-left))',
       bottom: 'max(24px, env(safe-area-inset-bottom))',
-      width: 'min(30vw, 130px)', height: 'min(30vw, 130px)', borderRadius: '50%',
+      width: 'min(30vw, 130px)', height: 'min(15vw, 65px)',
+      borderRadius: 'min(15vw, 65px) min(15vw, 65px) 0 0',
       background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.4)',
+      borderBottom: 'none',
       touchAction: 'none', pointerEvents: 'auto', zIndex: 10,
     });
     Object.assign(this.stickKnob.style, {
@@ -54,6 +56,16 @@ export class Controls {
     const setKnob = (dx, dy) => {
       this.stickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
     };
+    const clampToHalf = (dx, dy) => {
+      if (dy > 0) dy = 0;
+      const len = Math.hypot(dx, dy);
+      if (len > 0) {
+        const scale = Math.min(1, len);
+        dx = (dx / len) * scale;
+        dy = (dy / len) * scale;
+      }
+      return [dx, dy];
+    };
 
     this.stickBase.addEventListener('pointerdown', (e) => {
       stickId = e.pointerId;
@@ -68,8 +80,9 @@ export class Controls {
       if (e.pointerId !== stickId) return;
       let dx = e.clientX - stickCenter.x;
       let dy = e.clientY - stickCenter.y;
-      const len = Math.hypot(dx, dy);
       const R = Number(this.stickBase.dataset.radius) || 40;
+      [dx, dy] = clampToHalf(dx, dy);
+      const len = Math.hypot(dx, dy);
       if (len > R) {
         dx = (dx / len) * R;
         dy = (dy / len) * R;

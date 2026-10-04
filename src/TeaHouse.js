@@ -60,6 +60,26 @@ export class TeaHouse {
 
     this.box(this.doorW, 0.18, 1.0, this.mats.post, 0, 0.09, HD / 2 + 0.5);
     this.box(HW, 0.1, 1.4, this.mats.post, 0, FLOOR_Y + 0.05, HD / 2 + 0.7);
+    this.buildTerrace();
+  }
+
+  buildTerrace() {
+    const { FLOOR_Y, HW, HD } = this;
+    const depth = 2.4;
+    const zStart = HD / 2 + 0.1;
+    const deckTop = FLOOR_Y - 0.02;
+    this.box(HW + 0.4, 0.14, depth, this.mats.post, 0, deckTop - 0.07, zStart + depth / 2);
+    const deck = new THREE.Mesh(
+      new THREE.PlaneGeometry(HW + 0.3, depth - 0.06),
+      new THREE.MeshStandardMaterial({ map: this.makeWoodFloorTexture(), roughness: 0.85 })
+    );
+    deck.rotation.x = -Math.PI / 2;
+    deck.position.set(0, deckTop, zStart + depth / 2);
+    deck.receiveShadow = true;
+    this.group.add(deck);
+    for (let px = -(HW + 0.2) / 2 + 0.35; px <= (HW + 0.2) / 2; px += 0.7) {
+      this.box(0.16, 0.16, depth - 0.1, this.mats.darkWood, px, deckTop + 0.001, zStart + depth / 2, this.group, false);
+    }
   }
 
   buildFront() {
@@ -293,6 +313,6 @@ export class TeaHouse {
   }
 
   footprintContains(x, z) {
-    return Math.abs(x) < this.HW / 2 + 0.5 && Math.abs(z) < this.HD / 2 + 0.9;
+    return Math.abs(x) < this.HW / 2 + 0.7 && Math.abs(z) < this.HD / 2 + 2.9;
   }
 }

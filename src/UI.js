@@ -65,6 +65,12 @@ export class MeditationUI {
     this.meditating = false;
     this.btn.textContent = '🧘 Meditate';
     this.overlay.style.display = 'none';
+    this.setVisible(this.insideHouse);
+  }
+
+  setVisible(visible) {
+    this.insideHouse = visible;
+    this.btn.style.display = visible || this.meditating ? 'block' : 'none';
   }
 
   updateBreathText(time) {

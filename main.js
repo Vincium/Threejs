@@ -11,7 +11,7 @@ import { Controls } from './src/Controls.js';
 import { Player } from './src/Player.js';
 import { Human } from './src/Human.js';
 
-const BUILD_TIME = '2026-10-04 15:24 UTC';
+const BUILD_TIME = '2026-10-04 15:26 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -78,7 +78,9 @@ const humanCamDist = 3.2;
 const player = new Player(camera, controls, { body: human.pos, bodyHeight: 1.0 });
 meditationUI.onToggle = () => {
   player.meditating = meditationUI.meditating;
+  human.meditating = meditationUI.meditating;
 };
+meditationUI.setVisible(false);
 
 // ---------- Animate ----------
 const clock = new THREE.Clock();
@@ -93,6 +95,7 @@ function animate() {
   player.update(dt, { teaHouse, court, windTime: windUniform.value });
   const moving = !player.meditating && controls.getMoveVector().lengthSq() > 0;
   human.update(dt, camera, controls, { teaHouse, court, moving });
+  meditationUI.setVisible(teaHouse.contains(human.pos.x, human.pos.z));
 
   // Third-person camera: lag behind the human
   {

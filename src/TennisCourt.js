@@ -125,25 +125,27 @@ makeChainLinkTexture() {
 
 makeNetTexture() {
     const c = document.createElement('canvas');
-    const cell = 12;
-    c.width = c.height = cell * 10;
+    const cell = 32;
+    c.width = c.height = cell * 4;
     const ctx = c.getContext('2d');
     ctx.clearRect(0, 0, c.width, c.height);
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.6;
-    for (let i = 0; i <= c.width; i += cell) {
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    for (let i = 0; i <= 4; i++) {
       ctx.beginPath();
-      ctx.moveTo(i, 0);
-      ctx.lineTo(i, c.height);
+      ctx.moveTo(i * cell, 0);
+      ctx.lineTo(i * cell, c.height);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(0, i);
-      ctx.lineTo(c.width, i);
+      ctx.moveTo(0, i * cell);
+      ctx.lineTo(c.width, i * cell);
       ctx.stroke();
     }
     const tex = new THREE.CanvasTexture(c);
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
     tex.colorSpace = THREE.NoColorSpace;
+    tex.anisotropy = 8;
     return tex;
   }
 
@@ -161,7 +163,7 @@ makeNetTexture() {
     netGeo.computeVertexNormals();
     const netMat = this.mats.net.clone();
     netMat.alphaMap = this.makeNetTexture();
-    netMat.alphaMap.repeat.set(postX * 2 / 0.09, 0.914 / 0.09);
+    netMat.alphaMap.repeat.set(postX * 2 / 0.18, 1.07 / 0.18);
     const net = new THREE.Mesh(netGeo, netMat);
     net.position.y = 0.1;
     this.group.add(net);

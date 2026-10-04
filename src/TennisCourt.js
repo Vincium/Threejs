@@ -130,7 +130,7 @@ makeNetTexture() {
     const ctx = c.getContext('2d');
     ctx.clearRect(0, 0, c.width, c.height);
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 6;
+    ctx.lineWidth = 12;
     ctx.lineCap = 'round';
     for (let i = 0; i <= 4; i++) {
       ctx.beginPath();
@@ -167,12 +167,15 @@ makeNetTexture() {
     const net = new THREE.Mesh(netGeo, netMat);
     net.position.y = 0.1;
     this.group.add(net);
-    const bandGeo = new THREE.PlaneGeometry(postX * 2, 0.07, segs, 1);
+    const bandH = 0.16;
+    const bandGeo = new THREE.PlaneGeometry(postX * 2, bandH, segs, 1);
     const bpos = bandGeo.attributes.position;
+    const origYs = [];
+    for (let i = 0; i < bpos.count; i++) origYs.push(bpos.getY(i));
     for (let i = 0; i < bpos.count; i++) {
       const t = Math.abs(bpos.getX(i)) / postX;
       const h = NET_HEIGHT_CENTER + (NET_HEIGHT_POST - NET_HEIGHT_CENTER) * t;
-      bpos.setY(i, h);
+      bpos.setY(i, h + origYs[i] - bandH / 2);
     }
     bandGeo.computeVertexNormals();
     const band = new THREE.Mesh(bandGeo, this.mats.band);

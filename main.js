@@ -11,7 +11,7 @@ import { Controls } from './src/Controls.js';
 import { Player } from './src/Player.js';
 import { Human } from './src/Human.js';
 
-const BUILD_TIME = '2026-10-04 15:22 UTC';
+const BUILD_TIME = '2026-10-04 15:24 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -92,7 +92,7 @@ function animate() {
   controls.update(dt);
   player.update(dt, { teaHouse, court, windTime: windUniform.value });
   const moving = !player.meditating && controls.getMoveVector().lengthSq() > 0;
-  human.update(dt, camera, controls, { teaHouse, moving });
+  human.update(dt, camera, controls, { teaHouse, court, moving });
 
   // Third-person camera: lag behind the human
   {

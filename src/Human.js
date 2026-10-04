@@ -114,7 +114,7 @@ export class Human {
     return g;
   }
 
-  update(dt, camera, controls, { teaHouse, moving }) {
+  update(dt, camera, controls, { teaHouse, court, moving }) {
     const ease = (v, t) => v + (t - v) * Math.min(1, dt * 10);
 
     // Face the movement direction, then walk forward
@@ -133,7 +133,13 @@ export class Human {
     const movingForward = moving && this.walkAmount > 0.5;
     const forward = new THREE.Vector3(Math.sin(this.facing), 0, Math.cos(this.facing));
     if (movingForward) {
-      this.pos.addScaledVector(forward, 9 * dt);
+      const nx = this.pos.x + forward.x * 9 * dt;
+      const nz = this.pos.z + forward.z * 9 * dt;
+      const blocked = (x, z) =>
+        (teaHouse && teaHouse.inCollider(x, z)) ||
+        (court && court.inCollider(x, z, 0.35, this.pos.y));
+      if (!blocked(nx, this.pos.z)) this.pos.x = nx;
+      if (!blocked(this.pos.x, nz)) this.pos.z = nz;
     }
 
     const floorY = teaHouse.contains(this.pos.x, this.pos.z) ? teaHouse.FLOOR_Y : 0;

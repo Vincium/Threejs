@@ -25,7 +25,7 @@ export class TennisCourt {
       clay: new THREE.MeshStandardMaterial({ color: 0xd0592a, roughness: 1 }),
       line: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
       net: new THREE.MeshStandardMaterial({
-        color: 0x14100c, roughness: 1, side: THREE.DoubleSide,
+        color: 0xd8d8d8, roughness: 0.6, metalness: 0.3, side: THREE.DoubleSide,
         alphaMap: null, transparent: true, alphaTest: 0.5,
       }),
       band: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),

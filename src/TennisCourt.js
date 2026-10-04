@@ -154,7 +154,7 @@ makeChainLinkTexture() {
   buildFence() {
     const halfL = COURT_LENGTH / 2 + RUNOFF_END;
     const halfW = COURT_WIDTH / 2 + RUNOFF_SIDE;
-    const gateHalf = 0.75;
+    const gateHalf = 1.5;
     const postSpacing = 2.5;
     const addPosts = (alongZ, fixed, from, to, h = FENCE_HEIGHT) => {
       const n = Math.max(1, Math.ceil((to - from) / postSpacing));
@@ -201,7 +201,7 @@ makeChainLinkTexture() {
   buildColliders() {
     const halfL = COURT_LENGTH / 2 + RUNOFF_END;
     const halfW = COURT_WIDTH / 2 + RUNOFF_SIDE;
-    const gateHalf = 0.6;
+    const gateHalf = 1.5;
     this.colliders = [
       { x1: -halfW - 0.2, x2: -halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2, gate: true },
       { x1: halfW - 0.2, x2: halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2, gate: true },

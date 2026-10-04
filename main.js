@@ -10,7 +10,7 @@ import { MeditationUI } from './src/UI.js';
 import { Controls } from './src/Controls.js';
 import { Player } from './src/Player.js';
 
-const BUILD_TIME = '2026-10-04 11:55 UTC';
+const BUILD_TIME = '2026-10-04 12:10 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -86,6 +86,7 @@ function animate() {
   windUniform.value += dt;
 
   clouds.update(dt);
+  controls.update(dt);
   player.update(dt, { teaHouse, court, windTime: windUniform.value });
   if (meditationUI.meditating) {
     meditationUI.updateBreathText(windUniform.value);

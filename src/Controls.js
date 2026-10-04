@@ -145,6 +145,12 @@ export class Controls {
     }, { passive: false });
   }
 
+  update(dt) {
+    const turnSpeed = 1.8;
+    if (this.keys['ArrowLeft']) this.yaw += turnSpeed * dt;
+    if (this.keys['ArrowRight']) this.yaw -= turnSpeed * dt;
+  }
+
   getLookDirection() {
     return new THREE.Vector3(
       Math.sin(this.yaw) * Math.cos(this.pitch),
@@ -159,8 +165,8 @@ export class Controls {
     const v = new THREE.Vector3();
     if (this.keys['KeyW'] || this.keys['ArrowUp']) v.add(forward);
     if (this.keys['KeyS'] || this.keys['ArrowDown']) v.sub(forward);
-    if (this.keys['KeyA'] || this.keys['ArrowLeft']) v.add(right);
-    if (this.keys['KeyD'] || this.keys['ArrowRight']) v.sub(right);
+    if (this.keys['KeyA']) v.add(right);
+    if (this.keys['KeyD']) v.sub(right);
     if (this.touchMove.active) {
       v.addScaledVector(forward, -this.touchMove.y);
       v.addScaledVector(right, this.touchMove.x);

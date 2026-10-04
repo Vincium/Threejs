@@ -149,6 +149,15 @@ export class Controls {
     const turnSpeed = 1.8;
     if (this.keys['ArrowLeft']) this.yaw += turnSpeed * dt;
     if (this.keys['ArrowRight']) this.yaw -= turnSpeed * dt;
+
+    const v = this.getMoveVector();
+    if (v.lengthSq() > 0) {
+      const targetYaw = Math.atan2(-v.x, -v.z);
+      let diff = targetYaw - this.yaw;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      this.yaw += diff * Math.min(1, dt * 2);
+    }
   }
 
   getLookDirection() {

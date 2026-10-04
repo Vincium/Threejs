@@ -35,7 +35,6 @@ export class Player {
     if (this.controls.keys['KeyQ']) cam.y -= this.speed * dt;
     if (this.controls.keys['KeyE']) cam.y += this.speed * dt;
 
-    const eyeTarget = this.eyeHeight;
     const insideHouseFootprint = teaHouse.contains(cam.x, cam.z);
     const standEyeTarget = this.eyeHeight + (insideHouseFootprint ? teaHouse.FLOOR_Y : 0);
     if (Math.abs(cam.y - standEyeTarget) > 0.01) {

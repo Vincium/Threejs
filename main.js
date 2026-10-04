@@ -11,7 +11,7 @@ import { Controls } from './src/Controls.js';
 import { Player } from './src/Player.js';
 import { Human } from './src/Human.js';
 
-const BUILD_TIME = '2026-10-04 15:26 UTC';
+const BUILD_TIME = '2026-10-04 15:28 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;

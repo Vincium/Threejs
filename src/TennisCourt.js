@@ -24,7 +24,10 @@ export class TennisCourt {
     this.mats = {
       clay: new THREE.MeshStandardMaterial({ color: 0xd0592a, roughness: 1 }),
       line: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
-      net: new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 1, side: THREE.DoubleSide }),
+      net: new THREE.MeshStandardMaterial({
+        color: 0x14100c, roughness: 1, side: THREE.DoubleSide,
+        alphaMap: null, transparent: true, alphaTest: 0.5,
+      }),
       band: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
       post: new THREE.MeshStandardMaterial({ color: 0x2b2b2b, roughness: 0.6, metalness: 0.3 }),
       fence: new THREE.MeshStandardMaterial({
@@ -120,6 +123,30 @@ makeChainLinkTexture() {
     add(LINE_WIDTH, 0.1, 0, halfL - 0.05);
   }
 
+makeNetTexture() {
+    const c = document.createElement('canvas');
+    const cell = 12;
+    c.width = c.height = cell * 10;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.6;
+    for (let i = 0; i <= c.width; i += cell) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, c.height);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, i);
+      ctx.lineTo(c.width, i);
+      ctx.stroke();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.colorSpace = THREE.NoColorSpace;
+    return tex;
+  }
+
   buildNet() {
     const halfW = COURT_WIDTH / 2;
     const postX = halfW + 0.914;
@@ -132,7 +159,10 @@ makeChainLinkTexture() {
       pos.setY(i, pos.getY(i) > 0 ? h : 0);
     }
     netGeo.computeVertexNormals();
-    const net = new THREE.Mesh(netGeo, this.mats.net);
+    const netMat = this.mats.net.clone();
+    netMat.alphaMap = this.makeNetTexture();
+    netMat.alphaMap.repeat.set(postX * 2 / 0.09, 0.914 / 0.09);
+    const net = new THREE.Mesh(netGeo, netMat);
     net.position.y = 0.1;
     this.group.add(net);
     const bandGeo = new THREE.PlaneGeometry(postX * 2, 0.07, segs, 1);
@@ -203,6 +233,7 @@ makeChainLinkTexture() {
     const halfW = COURT_WIDTH / 2 + RUNOFF_SIDE;
     const gateHalf = 1.5;
     this.colliders = [
+      { net: true, x1: -halfW - 0.914, x2: halfW + 0.914, z1: -0.15, z2: 0.15 },
       { x1: -halfW - 0.2, x2: -halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2, gate: true },
       { x1: halfW - 0.2, x2: halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2, gate: true },
       { x1: -halfW - 0.2, x2: halfW + 0.2, z1: -halfL - 0.2, z2: -halfL + 0.2 },
@@ -211,10 +242,11 @@ makeChainLinkTexture() {
     this.gateHalf = gateHalf;
   }
 
-  inCollider(wx, wz, r = 0.35) {
+  inCollider(wx, wz, r = 0.35, y = null) {
     const x = wx - this.originX;
     const z = wz - this.originZ;
     for (const c of this.colliders) {
+      if (c.net && y !== null && y - 0.1 > NET_HEIGHT_POST) continue;
       if (c.gate && Math.abs(z) < this.gateHalf - r * 0.5) continue;
       if (x > c.x1 - r && x < c.x2 + r && z > c.z1 - r && z < c.z2 + r) return true;
     }

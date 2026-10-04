@@ -10,7 +10,7 @@ import { MeditationUI } from './src/UI.js';
 import { Controls } from './src/Controls.js';
 import { Player } from './src/Player.js';
 
-const BUILD_TIME = '2026-10-04 11:14 UTC';
+const BUILD_TIME = '2026-10-04 11:18 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;

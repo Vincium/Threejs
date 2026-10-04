@@ -28,7 +28,7 @@ export class Player {
       const step = move.normalize().multiplyScalar(this.speed * inputMagnitude * dt);
       const nx = cam.x + step.x;
       const nz = cam.z + step.z;
-      const blocked = (x, z) => teaHouse.inCollider(x, z) || (court && court.inCollider(x, z));
+      const blocked = (x, z) => teaHouse.inCollider(x, z) || (court && court.inCollider(x, z, 0.35, cam.y));
       if (!blocked(nx, cam.z)) cam.x = nx;
       if (!blocked(cam.x, nz)) cam.z = nz;
     }

@@ -238,7 +238,9 @@ makeNetTexture() {
     const halfW = COURT_WIDTH / 2 + RUNOFF_SIDE;
     const gateHalf = 1.5;
     this.colliders = [
-      { net: true, x1: -halfW - 0.914, x2: halfW + 0.914, z1: -0.15, z2: 0.15 },
+      { net: true, x1: -halfW - 0.5, x2: halfW + 0.5, z1: -0.15, z2: 0.15 },
+      { post: true, x1: -(halfW + 0.914) - 0.06, x2: -(halfW + 0.914) + 0.06, z1: -0.06, z2: 0.06 },
+      { post: true, x1: halfW + 0.914 - 0.06, x2: halfW + 0.914 + 0.06, z1: -0.06, z2: 0.06 },
       { x1: -halfW - 0.2, x2: -halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2, gate: true },
       { x1: halfW - 0.2, x2: halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2, gate: true },
       { x1: -halfW - 0.2, x2: halfW + 0.2, z1: -halfL - 0.2, z2: -halfL + 0.2 },
@@ -251,7 +253,7 @@ makeNetTexture() {
     const x = wx - this.originX;
     const z = wz - this.originZ;
     for (const c of this.colliders) {
-      if (c.net && y !== null && y - 0.1 > NET_HEIGHT_POST) continue;
+      if ((c.net || c.post) && y !== null && y - 0.1 > NET_HEIGHT_POST) continue;
       if (c.gate && Math.abs(z) < this.gateHalf - r * 0.5) continue;
       if (x > c.x1 - r && x < c.x2 + r && z > c.z1 - r && z < c.z2 + r) return true;
     }

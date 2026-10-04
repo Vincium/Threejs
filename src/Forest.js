@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { rand, addVertexColors, createWindSwayMaterial } from './utils.js?v=20261004181244';
+import { rand, addVertexColors, createWindSwayMaterial } from './utils.js?v=20261004181606';
 
 export class Forest {
   constructor(scene, { treeCount = 320, variantCount = 6, spread = 120, clearing = 8, excludeArea = null, lodRadius = 60 } = {}) {

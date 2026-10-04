@@ -8,7 +8,7 @@ export class Human {
     this.group = this.build();
     this.pos = new THREE.Vector3(0, 0, 30);
     this.group.position.copy(this.pos);
-    this.facing = 0;
+    this.facing = Math.PI;
     scene.add(this.group);
   }
 

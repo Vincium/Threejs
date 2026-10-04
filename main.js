@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { windUniform } from './src/utils.js?v=20261004172853';
-import { Terrain, Rocks } from './src/Terrain.js?v=20261004172853';
-import { Forest } from './src/Forest.js?v=20261004172853';
-import { GrassField } from './src/GrassField.js?v=20261004172853';
-import { Mountains, Clouds } from './src/Sky.js?v=20261004172853';
-import { TeaHouse } from './src/TeaHouse.js?v=20261004172853';
-import { TennisCourt } from './src/TennisCourt.js?v=20261004172853';
-import { MeditationUI } from './src/UI.js?v=20261004172853';
-import { Controls } from './src/Controls.js?v=20261004172853';
-import { Player } from './src/Player.js?v=20261004172853';
-import { Human } from './src/Human.js?v=20261004172853';
+import { windUniform } from './src/utils.js?v=20261004173145';
+import { Terrain, Rocks } from './src/Terrain.js?v=20261004173145';
+import { Forest } from './src/Forest.js?v=20261004173145';
+import { GrassField } from './src/GrassField.js?v=20261004173145';
+import { Mountains, Clouds } from './src/Sky.js?v=20261004173145';
+import { TeaHouse } from './src/TeaHouse.js?v=20261004173145';
+import { TennisCourt } from './src/TennisCourt.js?v=20261004173145';
+import { MeditationUI } from './src/UI.js?v=20261004173145';
+import { Controls } from './src/Controls.js?v=20261004173145';
+import { Player } from './src/Player.js?v=20261004173145';
+import { Human } from './src/Human.js?v=20261004173145';
 
-const BUILD_TIME = '2026-10-04 17:28 UTC';
+const BUILD_TIME = '2026-10-04 17:31 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -23,7 +23,7 @@ scene.background = new THREE.Color(0x87ceeb);
 scene.fog = new THREE.Fog(0x87ceeb, 40, 260);
 
 const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 500);
-camera.position.set(0, 6, 30);
+camera.position.set(0, 6, 33.2);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);

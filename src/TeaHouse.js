@@ -8,7 +8,7 @@ export class TeaHouse {
     this.HD = options.depth ?? 9;
     this.WALL_H = options.wallHeight ?? 5;
     this.HT = options.thickness ?? 0.24;
-    this.doorW = 3;
+    this.doorW = 4;
     this.doorH = 4.4;
 
     this.mats = {
@@ -49,14 +49,14 @@ export class TeaHouse {
     const { FLOOR_Y, HW, HD, HT } = this;
     this.box(HW, FLOOR_Y, HD, this.mats.post, 0, FLOOR_Y / 2, 0);
 
-    const tatami = new THREE.Mesh(
+    const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(HW - 0.5, HD - 0.5),
-      new THREE.MeshStandardMaterial({ map: this.makeTatamiTexture(), roughness: 0.95 })
+      new THREE.MeshStandardMaterial({ map: this.makeWoodFloorTexture(), roughness: 0.75 })
     );
-    tatami.rotation.x = -Math.PI / 2;
-    tatami.position.y = FLOOR_Y + 0.012;
-    tatami.receiveShadow = true;
-    this.group.add(tatami);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = FLOOR_Y + 0.012;
+    floor.receiveShadow = true;
+    this.group.add(floor);
 
     this.box(this.doorW, 0.18, 1.0, this.mats.post, 0, 0.09, HD / 2 + 0.5);
     this.box(HW, 0.1, 1.4, this.mats.post, 0, FLOOR_Y + 0.05, HD / 2 + 0.7);
@@ -76,7 +76,8 @@ export class TeaHouse {
     const corners = [
       [-HW/2+0.14, HD/2-0.14], [HW/2-0.14, HD/2-0.14],
       [-HW/2+0.14, -HD/2+0.14], [HW/2-0.14, -HD/2+0.14],
-      [0, HD/2-0.14], [0, -HD/2+0.14],
+      [-doorW/2-0.28, HD/2-0.14], [doorW/2+0.28, HD/2-0.14],
+      [0, -HD/2+0.14],
     ];
     for (const [px, pz] of corners) {
       const post = new THREE.Mesh(postGeo, this.mats.post);
@@ -233,34 +234,39 @@ export class TeaHouse {
     this.group.add(light);
   }
 
-  makeTatamiTexture() {
+  makeWoodFloorTexture() {
     const c = document.createElement('canvas');
     c.width = 768; c.height = 512;
     const ctx = c.getContext('2d');
-    ctx.fillStyle = '#2c261e';
-    ctx.fillRect(0, 0, c.width, c.height);
-    const cols = 3, rows = 2;
-    const mw = c.width / cols, mh = c.height / rows;
-    for (let i = 0; i < cols; i++) {
-      for (let j = 0; j < rows; j++) {
-        const x = i * mw, y = j * mh;
-        ctx.fillStyle = '#8e9d63';
-        ctx.fillRect(x + 7, y + 7, mw - 14, mh - 14);
-        ctx.strokeStyle = 'rgba(60,70,30,0.35)';
+    const plankH = 64;
+    const baseTones = ['#8a6a45', '#94744e', '#7e5f3d'];
+    for (let py = 0; py < c.height; py += plankH) {
+      const offset = (py / plankH) % 2 === 0 ? 0 : 120;
+      for (let px = -offset; px < c.width; px += 240) {
+        ctx.fillStyle = baseTones[(Math.random() * baseTones.length) | 0];
+        ctx.fillRect(px, py, 236, plankH - 3);
+        ctx.strokeStyle = 'rgba(40,25,12,0.6)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(px, py, 236, plankH - 3);
+        ctx.strokeStyle = 'rgba(60,40,20,0.25)';
         ctx.lineWidth = 1;
-        for (let g = 0; g < 30; g++) {
-          const gy = y + 10 + Math.random() * (mh - 20);
+        for (let g = 0; g < 6; g++) {
+          const gy = py + 8 + Math.random() * (plankH - 16);
           ctx.beginPath();
-          ctx.moveTo(x + 10, gy);
-          ctx.lineTo(x + mw - 10, gy + rand(-2, 2));
+          ctx.moveTo(px + 6, gy);
+          ctx.lineTo(px + 230, gy + rand(-3, 3));
           ctx.stroke();
         }
-        ctx.fillStyle = 'rgba(255,255,240,0.06)';
-        ctx.fillRect(x + 7, y + 7, mw - 14, mh - 14);
+        ctx.fillStyle = 'rgba(30,20,10,0.5)';
+        ctx.beginPath();
+        ctx.arc(px + rand(40, 200), py + plankH / 2, 1.5, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
     const tex = new THREE.CanvasTexture(c);
     tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(2, 2);
     return tex;
   }
 

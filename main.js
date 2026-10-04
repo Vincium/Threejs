@@ -10,7 +10,7 @@ import { MeditationUI } from './src/UI.js';
 import { Controls } from './src/Controls.js';
 import { Player } from './src/Player.js';
 
-const BUILD_TIME = '2026-10-04 09:56 UTC';
+const BUILD_TIME = '2026-10-04 10:05 UTC';
 const info = document.getElementById('info');
 if (info) {
   info.textContent += ' • v: ' + BUILD_TIME;
@@ -62,7 +62,7 @@ const courtExcl = { contains: (x, z) => court.footprintContains(x, z) };
 new Rocks(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) || courtExcl.contains(x, z) } });
 new Mountains(scene);
 const clouds = new Clouds(scene);
-new Forest(scene);
+new Forest(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) || courtExcl.contains(x, z) } });
 new GrassField(scene, { excludeArea: { contains: (x, z) => teaHouse.footprintContains(x, z) || courtExcl.contains(x, z) } });
 
 // ---------- Input & UI ----------

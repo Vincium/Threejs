@@ -15,6 +15,8 @@ export class TennisCourt {
     this.group = new THREE.Group();
     this.group.position.set(x, 0, z);
     this.group.rotation.y = rotationY;
+    this.originX = x;
+    this.originZ = z;
     this.COURT_LENGTH = COURT_LENGTH;
     this.COURT_WIDTH = COURT_WIDTH;
     this.FENCE_OFFSET = FENCE_OFFSET;
@@ -173,15 +175,17 @@ export class TennisCourt {
     const halfW = COURT_WIDTH / 2 + FENCE_OFFSET;
     const gateHalf = 0.6;
     this.colliders = [
-      { x1: -halfW - 0.3, x2: -halfW + 0.1, z1: -halfL, z2: halfL },
-      { x1: halfW - 0.1, x2: halfW + 0.3, z1: -halfL, z2: halfL },
-      { x1: -halfW, x2: halfW, z1: -halfL - 0.3, z2: -halfL + 0.1 },
-      { x1: -halfW, x2: halfW, z1: halfL - 0.1, z2: halfL + 0.3, gate: true },
+      { x1: -halfW - 0.2, x2: -halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2 },
+      { x1: halfW - 0.2, x2: halfW + 0.2, z1: -halfL - 0.2, z2: halfL + 0.2 },
+      { x1: -halfW - 0.2, x2: halfW + 0.2, z1: -halfL - 0.2, z2: -halfL + 0.2 },
+      { x1: -halfW - 0.2, x2: halfW + 0.2, z1: halfL - 0.2, z2: halfL + 0.2, gate: true },
     ];
     this.gateHalf = gateHalf;
   }
 
-  inCollider(x, z, r = 0.35) {
+  inCollider(wx, wz, r = 0.35) {
+    const x = wx - this.originX;
+    const z = wz - this.originZ;
     for (const c of this.colliders) {
       if (c.gate && Math.abs(x) < this.gateHalf - r * 0.5) continue;
       if (x > c.x1 - r && x < c.x2 + r && z > c.z1 - r && z < c.z2 + r) return true;
@@ -189,10 +193,10 @@ export class TennisCourt {
     return false;
   }
 
-  contains(x, z, margin = 1) {
+  contains(wx, wz, margin = 1) {
     const halfL = COURT_LENGTH / 2 + FENCE_OFFSET;
     const halfW = COURT_WIDTH / 2 + FENCE_OFFSET;
-    return Math.abs(x) < halfW + margin && Math.abs(z) < halfL + margin;
+    return Math.abs(wx - this.originX) < halfW + margin && Math.abs(wz - this.originZ) < halfL + margin;
   }
 
   footprintContains(x, z) {

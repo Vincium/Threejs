@@ -3,7 +3,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { rand, addVertexColors, createWindSwayMaterial } from './utils.js';
 
 export class Forest {
-  constructor(scene, { treeCount = 320, variantCount = 6, spread = 120, clearing = 8 } = {}) {
+  constructor(scene, { treeCount = 320, variantCount = 6, spread = 120, clearing = 8, excludeArea = null } = {}) {
     this.scene = scene;
     this.material = createWindSwayMaterial(
       { color: 0xffffff, roughness: 0.9, vertexColors: true, flatShading: true },
@@ -15,11 +15,11 @@ export class Forest {
     );
     const treesPerVariant = Math.ceil(treeCount / variantCount);
     for (let v = 0; v < variantCount; v++) {
-      scene.add(this.makeInstancedVariant(treesPerVariant, spread, clearing));
+      scene.add(this.makeInstancedVariant(treesPerVariant, spread, clearing, excludeArea));
     }
   }
 
-  makeInstancedVariant(count, spread, clearing) {
+  makeInstancedVariant(count, spread, clearing, excludeArea) {
     const mesh = new THREE.InstancedMesh(this.makeTreeGeometry(), this.material, count);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
@@ -30,7 +30,7 @@ export class Forest {
       guard++;
       const x = rand(-spread, spread);
       const z = rand(-spread, spread);
-      if (Math.hypot(x, z) < clearing) continue;
+      if (Math.hypot(x, z) < clearing) continue;      if (excludeArea && excludeArea.contains(x, z)) continue;
       dummy.position.set(x, 0, z);
       dummy.rotation.y = rand(0, Math.PI * 2);
       dummy.scale.setScalar(rand(0.8, 1.8));
